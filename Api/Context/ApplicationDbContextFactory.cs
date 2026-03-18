@@ -122,6 +122,11 @@ namespace NetWebApi.Context
 
         private static string GetConnectionString()
         {
+            // Environment variable takes precedence (useful for Docker)
+            var envConnectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
+            if (!string.IsNullOrEmpty(envConnectionString))
+                return envConnectionString;
+
             var configurationBuilder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", false, true);

@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34221.43
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetWebApi", "NetWebApi\NetWebApi.csproj", "{758A2B7F-45C2-4626-9701-60BEE2F5C5F0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Api", "Api\Api.csproj", "{758A2B7F-45C2-4626-9701-60BEE2F5C5F0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Model", "Model\Model.csproj", "{DC522B42-D872-4889-8EBE-D10F2BD2BB0C}"
 EndProject
