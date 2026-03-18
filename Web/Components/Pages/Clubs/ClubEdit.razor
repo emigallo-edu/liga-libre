@@ -1,0 +1,146 @@
+@page "/clubs/edit/{Id:int}"
+@using Web.Models
+@using Web.Services
+@inject ClubService ClubService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>Editar Club</PageTitle>
+
+<h3>Editar Club</h3>
+
+@if (_loading)
+{
+    <p>Cargando...</p>
+}
+else if (_club is null)
+{
+    <p>Club no encontrado.</p>
+}
+else
+{
+    <EditForm Model="_club" OnValidSubmit="HandleSubmit" FormName="EditClub">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label class="form-label">Nombre</label>
+            <InputText class="form-control" @bind-Value="_club.NombreClub" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Fecha de Fundacion</label>
+            <InputDate class="form-control" @bind-Value="_club.Birthday" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Ciudad</label>
+            <InputText class="form-control" @bind-Value="_club.City" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Email</label>
+            <InputText class="form-control" @bind-Value="_club.Email" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Cantidad de Socios</label>
+            <InputNumber class="form-control" @bind-Value="_club.NumberOfPartners" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Telefono</label>
+            <InputText class="form-control" @bind-Value="_club.Phone" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Direccion</label>
+            <InputText class="form-control" @bind-Value="_club.Address" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Nombre del Estadio</label>
+            <InputText class="form-control" @bind-Value="_club.StadiumName" />
+        </div>
+
+        @if (!string.IsNullOrEmpty(_error))
+        {
+            <div class="alert alert-danger">@_error</div>
+        }
+
+        <button type="submit" class="btn btn-primary" disabled="@_submitting">
+            @(_submitting ? "Guardando..." : "Guardar")
+        </button>
+        <a href="/clubs" class="btn btn-secondary">Cancelar</a>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private ClubDTO? _club;
+    private bool _loading = true;
+    private string? _error;
+    private bool _submitting;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var existing = await ClubService.GetByIdAsync(Id);
+            if (existing is not null)
+            {
+                _club = new ClubDTO
+                {
+                    Id = existing.Id,
+                    NombreClub = existing.Name,
+                    Birthday = existing.Birthday,
+                    City = existing.City,
+                    Email = existing.Email,
+                    NumberOfPartners = existing.NumberOfPartners,
+                    Phone = existing.Phone,
+                    Address = existing.Address,
+                    StadiumName = existing.StadiumName
+                };
+            }
+        }
+        catch (Exception ex)
+        {
+            _error = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (_club is null) return;
+
+        _submitting = true;
+        _error = null;
+
+        try
+        {
+            var response = await ClubService.UpdateAsync(_club);
+            if (response.IsSuccessStatusCode)
+            {
+                Navigation.NavigateTo("/clubs");
+            }
+            else
+            {
+                _error = $"Error al actualizar: {response.StatusCode}";
+            }
+        }
+        catch (Exception ex)
+        {
+            _error = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            _submitting = false;
+        }
+    }
+}

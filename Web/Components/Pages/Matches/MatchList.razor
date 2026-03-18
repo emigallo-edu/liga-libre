@@ -1,0 +1,69 @@
+@page "/matches/{TournamentId:int}"
+@using Web.Models
+@using Web.Services
+@inject MatchService MatchService
+@rendermode InteractiveServer
+
+<PageTitle>Partidos</PageTitle>
+
+<h3>Partidos - Torneo #@TournamentId</h3>
+
+<a href="/tournaments" class="btn btn-secondary mb-3">Volver a Torneos</a>
+<a href="/matches/register/@TournamentId" class="btn btn-primary mb-3">Registrar Resultado</a>
+
+@if (_loading)
+{
+    <p>Cargando...</p>
+}
+else if (_matches.Count == 0)
+{
+    <p>No hay partidos registrados para este torneo.</p>
+}
+else
+{
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>Local</th>
+                <th>Visitante</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var m in _matches)
+            {
+                <tr>
+                    <td>@m.Id</td>
+                    <td>@m.Date.ToString("dd/MM/yyyy")</td>
+                    <td>@m.LocalClub.Name</td>
+                    <td>@m.VisitingClub.Name</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    [Parameter]
+    public int TournamentId { get; set; }
+
+    private List<Match> _matches = new();
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _matches = await MatchService.GetByTournamentAsync(TournamentId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}

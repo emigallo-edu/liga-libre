@@ -1,0 +1,98 @@
+@page "/clubs/create"
+@using Web.Models
+@using Web.Services
+@inject ClubService ClubService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>Nuevo Club</PageTitle>
+
+<h3>Nuevo Club</h3>
+
+<EditForm Model="_club" OnValidSubmit="HandleSubmit" FormName="CreateClub">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label class="form-label">Nombre</label>
+        <InputText class="form-control" @bind-Value="_club.NombreClub" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Fecha de Fundacion</label>
+        <InputDate class="form-control" @bind-Value="_club.Birthday" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Ciudad</label>
+        <InputText class="form-control" @bind-Value="_club.City" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Email</label>
+        <InputText class="form-control" @bind-Value="_club.Email" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Cantidad de Socios</label>
+        <InputNumber class="form-control" @bind-Value="_club.NumberOfPartners" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Telefono</label>
+        <InputText class="form-control" @bind-Value="_club.Phone" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Direccion</label>
+        <InputText class="form-control" @bind-Value="_club.Address" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Nombre del Estadio</label>
+        <InputText class="form-control" @bind-Value="_club.StadiumName" />
+    </div>
+
+    @if (!string.IsNullOrEmpty(_error))
+    {
+        <div class="alert alert-danger">@_error</div>
+    }
+
+    <button type="submit" class="btn btn-primary" disabled="@_submitting">
+        @(_submitting ? "Guardando..." : "Crear")
+    </button>
+    <a href="/clubs" class="btn btn-secondary">Cancelar</a>
+</EditForm>
+
+@code {
+    private ClubDTO _club = new();
+    private string? _error;
+    private bool _submitting;
+
+    private async Task HandleSubmit()
+    {
+        _submitting = true;
+        _error = null;
+
+        try
+        {
+            var response = await ClubService.CreateAsync(_club);
+            if (response.IsSuccessStatusCode)
+            {
+                Navigation.NavigateTo("/clubs");
+            }
+            else
+            {
+                _error = $"Error al crear el club: {response.StatusCode}";
+            }
+        }
+        catch (Exception ex)
+        {
+            _error = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            _submitting = false;
+        }
+    }
+}

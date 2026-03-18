@@ -1,0 +1,60 @@
+@page "/tournaments/{Id:int}"
+@using Web.Models
+@using Web.Services
+@inject TournamentService TournamentService
+@rendermode InteractiveServer
+
+<PageTitle>Detalle del Torneo</PageTitle>
+
+@if (_loading)
+{
+    <p>Cargando...</p>
+}
+else if (_tournament is null)
+{
+    <p>Torneo no encontrado.</p>
+}
+else
+{
+    <h3>Torneo #@_tournament.Id</h3>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Inicio</dt>
+                <dd class="col-sm-9">@_tournament.Start.ToString("dd/MM/yyyy")</dd>
+
+                <dt class="col-sm-3">Fin</dt>
+                <dd class="col-sm-9">@_tournament.End.ToString("dd/MM/yyyy")</dd>
+            </dl>
+        </div>
+    </div>
+
+    <a href="/standings/@_tournament.Id" class="btn btn-primary">Ver Posiciones</a>
+    <a href="/matches/@_tournament.Id" class="btn btn-info">Ver Partidos</a>
+    <a href="/tournaments" class="btn btn-secondary">Volver</a>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Tournament? _tournament;
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _tournament = await TournamentService.GetByIdAsync(Id);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}

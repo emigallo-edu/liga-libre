@@ -1,0 +1,89 @@
+@page "/matches/register/{TournamentId:int}"
+@using Web.Models
+@using Web.Services
+@inject MatchService MatchService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>Registrar Resultado</PageTitle>
+
+<h3>Registrar Resultado - Torneo #@TournamentId</h3>
+
+<EditForm Model="_dto" OnValidSubmit="HandleSubmit" FormName="RegisterMatch">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label class="form-label">ID del Standing</label>
+        <InputNumber class="form-control" @bind-Value="_dto.StandingId" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">ID del Partido</label>
+        <InputNumber class="form-control" @bind-Value="_dto.Matchid" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Goles Local</label>
+        <InputNumber class="form-control" @bind-Value="_dto.LocalClubGoals" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Goles Visitante</label>
+        <InputNumber class="form-control" @bind-Value="_dto.VisitingClubGoals" />
+    </div>
+
+    @if (!string.IsNullOrEmpty(_error))
+    {
+        <div class="alert alert-danger">@_error</div>
+    }
+
+    @if (!string.IsNullOrEmpty(_success))
+    {
+        <div class="alert alert-success">@_success</div>
+    }
+
+    <button type="submit" class="btn btn-primary" disabled="@_submitting">
+        @(_submitting ? "Registrando..." : "Registrar")
+    </button>
+    <a href="/matches/@TournamentId" class="btn btn-secondary">Cancelar</a>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int TournamentId { get; set; }
+
+    private RegisterMatchDTO _dto = new();
+    private string? _error;
+    private string? _success;
+    private bool _submitting;
+
+    private async Task HandleSubmit()
+    {
+        _submitting = true;
+        _error = null;
+        _success = null;
+
+        try
+        {
+            var response = await MatchService.RegisterAsync(_dto);
+            if (response.IsSuccessStatusCode)
+            {
+                _success = "Resultado registrado exitosamente";
+                _dto = new();
+            }
+            else
+            {
+                _error = $"Error al registrar: {response.StatusCode}";
+            }
+        }
+        catch (Exception ex)
+        {
+            _error = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            _submitting = false;
+        }
+    }
+}

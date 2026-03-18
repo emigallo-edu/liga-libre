@@ -1,0 +1,75 @@
+@page "/standings/{TournamentId:int}"
+@using Web.Models
+@using Web.Services
+@inject StandingService StandingService
+@rendermode InteractiveServer
+
+<PageTitle>Posiciones</PageTitle>
+
+<h3>Tabla de Posiciones - Torneo #@TournamentId</h3>
+
+<a href="/tournaments" class="btn btn-secondary mb-3">Volver a Torneos</a>
+
+@if (_loading)
+{
+    <p>Cargando...</p>
+}
+else if (_standings.Count == 0)
+{
+    <p>No hay posiciones registradas para este torneo.</p>
+}
+else
+{
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Club</th>
+                <th>PJ</th>
+                <th>G</th>
+                <th>E</th>
+                <th>P</th>
+                <th>Pts</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{ var position = 1; }
+            @foreach (var s in _standings.OrderByDescending(s => s.Win * 3 + s.Draw))
+            {
+                <tr>
+                    <td>@(position++)</td>
+                    <td>@s.Club.Name</td>
+                    <td>@(s.Win + s.Draw + s.Loss)</td>
+                    <td>@s.Win</td>
+                    <td>@s.Draw</td>
+                    <td>@s.Loss</td>
+                    <td><strong>@(s.Win * 3 + s.Draw)</strong></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    [Parameter]
+    public int TournamentId { get; set; }
+
+    private List<Standing> _standings = new();
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _standings = await StandingService.GetByTournamentAsync(TournamentId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}

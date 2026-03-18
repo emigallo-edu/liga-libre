@@ -1,0 +1,74 @@
+@page "/clubs"
+@using Web.Models
+@using Web.Services
+@inject ClubService ClubService
+@rendermode InteractiveServer
+
+<PageTitle>Clubes</PageTitle>
+
+<h3>Clubes</h3>
+
+<a href="/clubs/create" class="btn btn-primary mb-3">Nuevo Club</a>
+
+@if (_loading)
+{
+    <p>Cargando...</p>
+}
+else if (_clubs.Count == 0)
+{
+    <p>No hay clubes registrados.</p>
+}
+else
+{
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Ciudad</th>
+                <th>Fundacion</th>
+                <th>Socios</th>
+                <th>Estadio</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var club in _clubs)
+            {
+                <tr>
+                    <td>@club.Id</td>
+                    <td>@club.Name</td>
+                    <td>@club.City</td>
+                    <td>@club.Birthday.ToString("dd/MM/yyyy")</td>
+                    <td>@club.NumberOfPartners</td>
+                    <td>@(club.StadiumName ?? "-")</td>
+                    <td>
+                        <a href="/clubs/edit/@club.Id" class="btn btn-sm btn-outline-primary">Editar</a>
+                        <a href="/clubs/@club.Id" class="btn btn-sm btn-outline-secondary">Ver</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Club> _clubs = new();
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _clubs = await ClubService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar clubes: {ex.Message}");
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}

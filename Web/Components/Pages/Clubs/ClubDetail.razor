@@ -1,0 +1,77 @@
+@page "/clubs/{Id:int}"
+@using Web.Models
+@using Web.Services
+@inject ClubService ClubService
+@rendermode InteractiveServer
+
+<PageTitle>Detalle del Club</PageTitle>
+
+@if (_loading)
+{
+    <p>Cargando...</p>
+}
+else if (_club is null)
+{
+    <p>Club no encontrado.</p>
+}
+else
+{
+    <h3>@_club.Name</h3>
+
+    <div class="card">
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">ID</dt>
+                <dd class="col-sm-9">@_club.Id</dd>
+
+                <dt class="col-sm-3">Fundacion</dt>
+                <dd class="col-sm-9">@_club.Birthday.ToString("dd/MM/yyyy")</dd>
+
+                <dt class="col-sm-3">Ciudad</dt>
+                <dd class="col-sm-9">@_club.City</dd>
+
+                <dt class="col-sm-3">Email</dt>
+                <dd class="col-sm-9">@_club.Email</dd>
+
+                <dt class="col-sm-3">Telefono</dt>
+                <dd class="col-sm-9">@_club.Phone</dd>
+
+                <dt class="col-sm-3">Direccion</dt>
+                <dd class="col-sm-9">@(_club.Address ?? "-")</dd>
+
+                <dt class="col-sm-3">Socios</dt>
+                <dd class="col-sm-9">@_club.NumberOfPartners</dd>
+
+                <dt class="col-sm-3">Estadio</dt>
+                <dd class="col-sm-9">@(_club.StadiumName ?? "-")</dd>
+            </dl>
+        </div>
+    </div>
+
+    <a href="/clubs" class="btn btn-secondary mt-3">Volver</a>
+    <a href="/clubs/edit/@_club.Id" class="btn btn-primary mt-3">Editar</a>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Club? _club;
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _club = await ClubService.GetByIdAsync(Id);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}

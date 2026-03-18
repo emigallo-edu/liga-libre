@@ -1,0 +1,116 @@
+@page "/tournaments"
+@using Web.Models
+@using Web.Services
+@inject TournamentService TournamentService
+@rendermode InteractiveServer
+
+<PageTitle>Torneos</PageTitle>
+
+<h3>Torneos</h3>
+
+<button class="btn btn-primary mb-3" @onclick="CreateTournament" disabled="@_creating">
+    @(_creating ? "Creando..." : "Nuevo Torneo")
+</button>
+
+@if (!string.IsNullOrEmpty(_message))
+{
+    <div class="alert @(_isError ? "alert-danger" : "alert-success")">@_message</div>
+}
+
+@if (_loading)
+{
+    <p>Cargando...</p>
+}
+else if (_tournaments.Count == 0)
+{
+    <p>No hay torneos registrados.</p>
+}
+else
+{
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Inicio</th>
+                <th>Fin</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var t in _tournaments)
+            {
+                <tr>
+                    <td>@t.Id</td>
+                    <td>@t.Start.ToString("dd/MM/yyyy")</td>
+                    <td>@t.End.ToString("dd/MM/yyyy")</td>
+                    <td>
+                        <a href="/tournaments/@t.Id" class="btn btn-sm btn-outline-secondary">Ver</a>
+                        <a href="/standings/@t.Id" class="btn btn-sm btn-outline-primary">Posiciones</a>
+                        <a href="/matches/@t.Id" class="btn btn-sm btn-outline-info">Partidos</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Tournament> _tournaments = new();
+    private bool _loading = true;
+    private bool _creating;
+    private string? _message;
+    private bool _isError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTournaments();
+    }
+
+    private async Task LoadTournaments()
+    {
+        _loading = true;
+        try
+        {
+            _tournaments = await TournamentService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task CreateTournament()
+    {
+        _creating = true;
+        _message = null;
+
+        try
+        {
+            var response = await TournamentService.CreateAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                _message = "Torneo creado exitosamente";
+                _isError = false;
+                await LoadTournaments();
+            }
+            else
+            {
+                _message = $"Error al crear torneo: {response.StatusCode}";
+                _isError = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            _message = $"Error: {ex.Message}";
+            _isError = true;
+        }
+        finally
+        {
+            _creating = false;
+        }
+    }
+}

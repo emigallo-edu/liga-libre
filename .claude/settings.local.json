@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /c/Stuff/git/edu/liga-libre -path *Model* -type f -name *.cs)",
+      "Bash(dotnet new:*)",
+      "Bash(dotnet sln:*)",
+      "Bash(dotnet build:*)",
+      "Bash(mv Web/Pages/Clubs/* Web/Components/Pages/Clubs/)",
+      "Bash(mv Web/Pages/Tournaments/* Web/Components/Pages/Tournaments/)",
+      "Bash(mv Web/Pages/Matches/* Web/Components/Pages/Matches/)",
+      "Bash(mv Web/Pages/Standings/* Web/Components/Pages/Standings/)",
+      "Bash(mv Web/Pages/Auth/* Web/Components/Pages/Auth/)"
+    ]
+  }
+}
