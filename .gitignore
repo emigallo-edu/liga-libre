@@ -24,3 +24,4 @@ Packages/
 /Prep.Rest/App.Debug-TS.config
 /Prep.Rest/App.Release-TS.config
 /Prep.Rest/appsettings.json
+.claude/

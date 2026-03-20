@@ -2,11 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Model.Entities;
 using Model.Repositories;
 using Repository;
 using Security;
-using System;
 
 namespace NetWebApi.Context
 {
