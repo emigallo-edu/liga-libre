@@ -1,7 +1,9 @@
-using Model.ApplicationBusinessRules;
+using ApplicationBusinessRules;
 using Model.Entities;
+using Model.EnterpriseBusinessRules;
 using Model.Repositories;
 using Test.Repositories;
+
 
 namespace Test
 {
@@ -13,7 +15,9 @@ namespace Test
         {
             IClubRepository clubRepository = new ClubMockRepository();
             IStadiumRepository stadiumRepository = new StadiumMockRepository();
-            var sut = new CreateClub(clubRepository, stadiumRepository);
+            var insertClub = new InsertClub(clubRepository);
+            var getStadium = new GetStadium(stadiumRepository);
+            var sut = new CreateClubUseCase(insertClub, getStadium);
 
             int clubId = await sut.ExecuteAsync(new Club
             {
@@ -32,7 +36,9 @@ namespace Test
         {
             IClubRepository clubRepository = new ClubMockRepository();
             IStadiumRepository stadiumRepository = new StadiumMockRepository();
-            var sut = new CreateClub(clubRepository, stadiumRepository);
+            var insertClub = new InsertClub(clubRepository);
+            var getStadium = new GetStadium(stadiumRepository);
+            var sut = new CreateClubUseCase(insertClub, getStadium);
             try
             {
                 int clubId = await sut.ExecuteAsync(new Club
@@ -123,7 +129,7 @@ namespace Test
                 case FormasGeometricas.Rombo:
                     return ladoA * 2;
                 default:
-                    throw new ArgumentException("Forma geométrica no soportada");
+                    throw new ArgumentException("Forma geomï¿½trica no soportada");
             }
         }
     }

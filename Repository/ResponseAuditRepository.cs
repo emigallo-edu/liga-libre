@@ -1,9 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Model.Entities;
+using Model.Repositories;
 
 namespace Repository
 {
-    public class ResponseAuditRepository
+    public class ResponseAuditRepository : IResponseAuditRepository
     {
         private readonly DbContextOptions<ApplicationDbContext> _options;
 

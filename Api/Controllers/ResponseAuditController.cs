@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Repository;
+using ApplicationBusinessRules;
+using Microsoft.AspNetCore.Mvc;
 
 namespace NetWebApi.Controllers
 {
@@ -7,17 +7,17 @@ namespace NetWebApi.Controllers
     [Route("[controller]")]
     public class ResponseAuditController : Controller
     {
-        private readonly ResponseAuditRepository _responseAuditRepository;
+        private readonly GetAllResponseAuditsUseCase _getAllResponseAudits;
 
-        public ResponseAuditController(ResponseAuditRepository repository)
+        public ResponseAuditController(GetAllResponseAuditsUseCase getAllResponseAudits)
         {
-            this._responseAuditRepository = repository;
+            this._getAllResponseAudits = getAllResponseAudits;
         }
 
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var result = await this._responseAuditRepository.GetAllAsync();
+            var result = await this._getAllResponseAudits.ExecuteAsync();
             return Ok(result);
         }
     }

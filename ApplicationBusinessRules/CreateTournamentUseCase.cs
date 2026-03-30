@@ -1,23 +1,23 @@
-﻿using Model.Entities;
-using Model.Repositories;
+using Model.Entities;
+using Model.EnterpriseBusinessRules;
 
-namespace Model.ApplicationBusinessRules
+namespace ApplicationBusinessRules
 {
-    public class CreateTournament
+    public class CreateTournamentUseCase
     {
-        private readonly IClubRepository _clubRepository;
-        private readonly ITournamentRepository _tournamentRepository;
+        private readonly GetAllClubs _getAllClubs;
+        private readonly InsertTournament _insertTournament;
         private Tournament _tournament;
 
-        public CreateTournament(IClubRepository clubRepository, ITournamentRepository tournamentRepository)
+        public CreateTournamentUseCase(GetAllClubs getAllClubs, InsertTournament insertTournament)
         {
-            this._clubRepository = clubRepository;
-            this._tournamentRepository = tournamentRepository;
+            this._getAllClubs = getAllClubs;
+            this._insertTournament = insertTournament;
         }
 
         public async Task<int> ExecuteAsync()
         {
-            List<Club> clubs = await this._clubRepository.GetAllAsync();
+            List<Club> clubs = await this._getAllClubs.ExecuteAsync();
             clubs = clubs.Take(4).ToList();
             List<Match> matches = this.GetDayMatchs(clubs);
 
@@ -39,7 +39,7 @@ namespace Model.ApplicationBusinessRules
             }
 
             // Devuelvo la cantidad de registros afectados en el insert (en este caso siempre va a ser 0 o 1)
-            return await this._tournamentRepository.InsertAsync(this._tournament);
+            return await this._insertTournament.ExecuteAsync(this._tournament);
         }
 
         public int GetTournamentIdCreated()

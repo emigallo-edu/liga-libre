@@ -1,21 +1,21 @@
-﻿using Model.Entities;
-using Model.Repositories;
+using Model.Entities;
+using Model.EnterpriseBusinessRules;
 
-namespace Model.ApplicationBusinessRules
+namespace ApplicationBusinessRules
 {
-    public class CreateClub
+    public class CreateClubUseCase
     {
-        private readonly IClubRepository _clubRepository;
-        private readonly IStadiumRepository _stadiumRepository;
+        private readonly InsertClub _insertClub;
+        private readonly GetStadium _getStadium;
 
-        public CreateClub(IClubRepository clubRepository, IStadiumRepository stadiumRepository)
+        public CreateClubUseCase(InsertClub insertClub, GetStadium getStadium)
         {
-            this._clubRepository = clubRepository;
-            this._stadiumRepository = stadiumRepository;
+            this._insertClub = insertClub;
+            this._getStadium = getStadium;
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="club"></param>
         /// <returns>Devuelve el identificar del club insertado</returns>
@@ -23,7 +23,7 @@ namespace Model.ApplicationBusinessRules
         {
             this.EnsureClubIsOkForCreation(club);
             await this.EnsureStadiumExistsAsync(club.StadiumName);
-            return await this._clubRepository.InsertAsync(club);
+            return await this._insertClub.ExecuteAsync(club);
         }
 
         private void EnsureClubIsOkForCreation(Club club)
@@ -46,7 +46,7 @@ namespace Model.ApplicationBusinessRules
 
         private async Task EnsureStadiumExistsAsync(string stadiumName)
         {
-            Stadium stadium = await this._stadiumRepository.GetByIdAsync(stadiumName);
+            Stadium stadium = await this._getStadium.ExecuteAsync(stadiumName);
             if (stadium is null)
             {
                 throw new ArgumentException("El estadio no existe");

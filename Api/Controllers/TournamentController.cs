@@ -1,6 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Model.ApplicationBusinessRules;
-using Model.Repositories;
+using ApplicationBusinessRules;
+using Microsoft.AspNetCore.Mvc;
 
 namespace NetWebApi.Controllers
 {
@@ -8,13 +7,18 @@ namespace NetWebApi.Controllers
     [Route("[controller]")]
     public class TournamentController : Controller
     {
-        private readonly CreateTournament _createTournamentService;
-        private readonly ITournamentRepository _repository;
+        private readonly CreateTournamentUseCase _createTournament;
+        private readonly GetAllTournamentsUseCase _getAllTournaments;
+        private readonly GetTournamentByIdUseCase _getTournamentById;
 
-        public TournamentController(CreateTournament createTournamentService, ITournamentRepository repository)
+        public TournamentController(
+            CreateTournamentUseCase createTournament,
+            GetAllTournamentsUseCase getAllTournaments,
+            GetTournamentByIdUseCase getTournamentById)
         {
-            this._createTournamentService = createTournamentService;
-            this._repository = repository;
+            this._createTournament = createTournament;
+            this._getAllTournaments = getAllTournaments;
+            this._getTournamentById = getTournamentById;
         }
 
         [HttpPost]
@@ -22,8 +26,8 @@ namespace NetWebApi.Controllers
         {
             try
             {
-                await this._createTournamentService.ExecuteAsync();
-                return Ok($"Torneo {this._createTournamentService} creado correctamente");
+                await this._createTournament.ExecuteAsync();
+                return Ok($"Torneo {this._createTournament} creado correctamente");
             }
             catch (Exception)
             {
@@ -34,14 +38,14 @@ namespace NetWebApi.Controllers
         [HttpGet("all")]
         public async Task<IActionResult> GetAll()
         {
-            var result = await this._repository.GetAllAsync();
+            var result = await this._getAllTournaments.ExecuteAsync();
             return Ok(result);
         }
 
         [HttpGet("id/{id}")]
         public async Task<IActionResult> Get([FromRoute] int id)
         {
-            var result = await this._repository.GetByIdAsync(id);
+            var result = await this._getTournamentById.ExecuteAsync(id);
             return Ok(result);
         }
     }

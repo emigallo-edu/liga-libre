@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using ApplicationBusinessRules;
+using Microsoft.AspNetCore.Mvc;
 using Model.Entities;
 using NetWebApi.Model;
-using Repository;
 using System.Text;
 
 namespace NetWebApi.Controllers
@@ -10,17 +10,17 @@ namespace NetWebApi.Controllers
     [Route("[controller]")]
     public class StandingController : Controller
     {
-        private readonly StandingRepository _standingRepository;
+        private readonly GetStandingsByTournamentUseCase _getStandingsByTournament;
 
-        public StandingController(StandingRepository standingRepository)
+        public StandingController(GetStandingsByTournamentUseCase getStandingsByTournament)
         {
-            this._standingRepository = standingRepository;
+            this._getStandingsByTournament = getStandingsByTournament;
         }
 
         [HttpGet("TournamentId/{id}")]
         public async Task<IActionResult> Get([FromRoute] int id)
         {
-            var list = await this._standingRepository.GetByTournamentAsync(id);
+            var list = await this._getStandingsByTournament.ExecuteAsync(id);
             return Ok(list);
         }
 
@@ -29,7 +29,7 @@ namespace NetWebApi.Controllers
         {
             List<StandingReportDTO> result = new List<StandingReportDTO>();
 
-            foreach (Standing standing in await this._standingRepository.GetByTournamentAsync(id))
+            foreach (Standing standing in await this._getStandingsByTournament.ExecuteAsync(id))
             {
                 result.Add(new StandingReportDTO(standing));
             }

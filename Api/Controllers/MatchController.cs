@@ -1,7 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Model.Entities;
+using ApplicationBusinessRules;
+using Microsoft.AspNetCore.Mvc;
 using NetWebApi.Model;
-using Repository;
 
 namespace NetWebApi.Controllers
 {
@@ -9,79 +8,53 @@ namespace NetWebApi.Controllers
     [Route("[controller]")]
     public class MatchController : Controller
     {
-        private readonly MatchRepository _matchRepository;
-        private readonly StandingRepository _standingRepository;
+        private readonly GetMatchesByTournamentUseCase _getMatchesByTournament;
+        private readonly RegisterMatchResultUseCase _registerMatchResult;
 
-        public MatchController(MatchRepository matchRepository, StandingRepository standingRepository)
+        public MatchController(
+            GetMatchesByTournamentUseCase getMatchesByTournament,
+            RegisterMatchResultUseCase registerMatchResult)
         {
-            this._matchRepository = matchRepository;
-            this._standingRepository = standingRepository;
+            this._getMatchesByTournament = getMatchesByTournament;
+            this._registerMatchResult = registerMatchResult;
         }
 
         [HttpGet("{tournamentId}")]
         public async Task<IActionResult> GetAll([FromRoute] int tournamentId)
         {
-            var result = await this._matchRepository.GetByTournamentAsyncV1(tournamentId);
+            var result = await this._getMatchesByTournament.ExecuteAsyncV1(tournamentId);
             return Ok(result);
         }
 
         [HttpGet("v2/{tournamentId}")]
         public async Task<IActionResult> GetAllV2([FromRoute] int tournamentId)
         {
-            var result = await this._matchRepository.GetByTournamentAsyncV2(tournamentId);
+            var result = await this._getMatchesByTournament.ExecuteAsyncV2(tournamentId);
             return Ok(result);
         }
 
         [HttpGet("v3/{tournamentId}")]
         public async Task<IActionResult> GetAllV3([FromRoute] int tournamentId)
         {
-            var result = await this._matchRepository.GetByTournamentAsyncV3(tournamentId);
+            var result = await this._getMatchesByTournament.ExecuteAsyncV3(tournamentId);
             return Ok(result);
         }
 
         [HttpGet("v4/{tournamentId}")]
         public async Task<IActionResult> GetAllV4([FromRoute] int tournamentId)
         {
-            var result = await this._matchRepository.GetByTournamentAsyncV4(tournamentId);
+            var result = await this._getMatchesByTournament.ExecuteAsyncV4(tournamentId);
             return Ok(result);
         }
 
         [HttpPost("Register")]
         public async Task<IActionResult> RegisterMatch(RegisterMatchDTO item)
         {
-            var matchResult = new MatchResult()
-            {
-                Matchid = item.Matchid,
-                LocalClubGoals = item.LocalClubGoals,
-                VisitingClubGoals = item.VisitingClubGoals
-            };
-            await this._matchRepository.InsertMatchResult(matchResult);
-
-            Match match = await this._matchRepository.GetAsync(matchResult.Matchid);
-
-            Standing localStandingClub = await this._standingRepository.GetAsync(item.StandingId, match.LocalClubId);
-            Standing visitingStandingClub = await this._standingRepository.GetAsync(item.StandingId, match.VisitingClubId);
-
-            switch (item.CalculateMatchResult())
-            {
-                case Model.MatchResultEnum.LocalClubWon:
-                    localStandingClub.Win++;
-                    visitingStandingClub.Loss++;
-                    break;
-                case Model.MatchResultEnum.VisitingClubWon:
-                    localStandingClub.Loss++;
-                    visitingStandingClub.Win++;
-                    break;
-                case Model.MatchResultEnum.Draw:
-                    localStandingClub.Draw++;
-                    visitingStandingClub.Draw++;
-                    break;
-                default:
-                    break;
-            }
-
-            await this._standingRepository.UpdateAsync(localStandingClub);
-            await this._standingRepository.UpdateAsync(visitingStandingClub);
+            await this._registerMatchResult.ExecuteAsync(
+                item.StandingId,
+                item.Matchid,
+                item.LocalClubGoals,
+                item.VisitingClubGoals);
             return Ok();
         }
     }

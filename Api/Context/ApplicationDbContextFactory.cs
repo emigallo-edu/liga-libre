@@ -89,10 +89,11 @@ namespace NetWebApi.Context
             {
                 services.AddScoped<IClubRepository, ClubDbRepository>();
             }
-            services.AddScoped<ResponseAuditRepository>();
-            services.AddScoped<MatchRepository>();
-            services.AddScoped<StandingRepository>();
-            services.AddScoped<TournamentRepository>();
+            services.AddScoped<IResponseAuditRepository, ResponseAuditRepository>();
+            services.AddScoped<IMatchRepository, MatchRepository>();
+            services.AddScoped<IStandingRepository, StandingRepository>();
+            services.AddScoped<ITournamentRepository, TournamentRepository>();
+            services.AddScoped<IStadiumRepository, StadiumRepository>();
         }
 
         public static T Get<T>()

@@ -1,9 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Model.Entities;
+using Model.Repositories;
 
 namespace Repository
 {
-    public class MatchRepository
+    public class MatchRepository : IMatchRepository
     {
         private readonly DbContextOptions<ApplicationDbContext> _options;
 

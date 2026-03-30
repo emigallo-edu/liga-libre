@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Filters;
 using Model.Entities;
 using NetWebApi.Context;
-using Repository;
+using Model.Repositories;
 using System.Text.Json;
 
 namespace NetWebApi.Middlewares
@@ -18,7 +18,7 @@ namespace NetWebApi.Middlewares
         {
             using (var scope = ApplicationDbContextFactoryConfig.GetProvider().CreateScope())
             {
-                var responseAuditRepository = scope.ServiceProvider.GetRequiredService<ResponseAuditRepository>();
+                var responseAuditRepository = scope.ServiceProvider.GetRequiredService<IResponseAuditRepository>();
 
                 var action = await next();
                 var result = action.Result as OkObjectResult;
