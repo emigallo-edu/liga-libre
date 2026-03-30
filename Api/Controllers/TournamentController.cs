@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Model.Entities;
+using Model.ApplicationBusinessRules;
 using Model.Repositories;
-using Model.Services;
 
 namespace NetWebApi.Controllers
 {
@@ -9,10 +8,10 @@ namespace NetWebApi.Controllers
     [Route("[controller]")]
     public class TournamentController : Controller
     {
-        private readonly CreateTournamentService _createTournamentService;
+        private readonly CreateTournament _createTournamentService;
         private readonly ITournamentRepository _repository;
 
-        public TournamentController(CreateTournamentService createTournamentService, ITournamentRepository repository)
+        public TournamentController(CreateTournament createTournamentService, ITournamentRepository repository)
         {
             this._createTournamentService = createTournamentService;
             this._repository = repository;

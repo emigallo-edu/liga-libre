@@ -136,35 +136,5 @@ namespace NetWebApi.Controllers
         {
             return club.Birthday.Year > 1993;
         }
-
-        private List<Club> FilterOldSchool(List<Club> clubs)
-        {
-            List<Club> result = new List<Club>();
-
-            foreach (Club club in clubs)
-            {
-                if (club.Birthday.Year > 1993)
-                {
-                    result.Add(club);
-                }
-            }
-
-            return result;
-        }
-
-        private List<T> Where<T>(List<T> clubs, Func<T, bool> filter)
-        {
-            List<T> result = new List<T>();
-
-            foreach (T club in clubs)
-            {
-                if (filter(club))
-                {
-                    result.Add(club);
-                }
-            }
-
-            return result;
-        }
     }
 }

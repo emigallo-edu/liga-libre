@@ -1,14 +1,14 @@
 ﻿using Model.Entities;
 using Model.Repositories;
 
-namespace Model.Services
+namespace Model.ApplicationBusinessRules
 {
-    public class CreateClubService
+    public class CreateClub
     {
         private readonly IClubRepository _clubRepository;
         private readonly IStadiumRepository _stadiumRepository;
 
-        public CreateClubService(IClubRepository clubRepository, IStadiumRepository stadiumRepository)
+        public CreateClub(IClubRepository clubRepository, IStadiumRepository stadiumRepository)
         {
             this._clubRepository = clubRepository;
             this._stadiumRepository = stadiumRepository;

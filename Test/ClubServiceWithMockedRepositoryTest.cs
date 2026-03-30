@@ -1,6 +1,6 @@
+using Model.ApplicationBusinessRules;
 using Model.Entities;
 using Model.Repositories;
-using Model.Services;
 using Test.Repositories;
 
 namespace Test
@@ -13,7 +13,7 @@ namespace Test
         {
             IClubRepository clubRepository = new ClubMockRepository();
             IStadiumRepository stadiumRepository = new StadiumMockRepository();
-            var sut = new CreateClubService(clubRepository, stadiumRepository);
+            var sut = new CreateClub(clubRepository, stadiumRepository);
 
             int clubId = await sut.ExecuteAsync(new Club
             {
@@ -32,7 +32,7 @@ namespace Test
         {
             IClubRepository clubRepository = new ClubMockRepository();
             IStadiumRepository stadiumRepository = new StadiumMockRepository();
-            var sut = new CreateClubService(clubRepository, stadiumRepository);
+            var sut = new CreateClub(clubRepository, stadiumRepository);
             try
             {
                 int clubId = await sut.ExecuteAsync(new Club

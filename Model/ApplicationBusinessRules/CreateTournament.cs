@@ -1,15 +1,15 @@
 ﻿using Model.Entities;
 using Model.Repositories;
 
-namespace Model.Services
+namespace Model.ApplicationBusinessRules
 {
-    public class CreateTournamentService
+    public class CreateTournament
     {
         private readonly IClubRepository _clubRepository;
         private readonly ITournamentRepository _tournamentRepository;
         private Tournament _tournament;
 
-        public CreateTournamentService(IClubRepository clubRepository, ITournamentRepository tournamentRepository)
+        public CreateTournament(IClubRepository clubRepository, ITournamentRepository tournamentRepository)
         {
             this._clubRepository = clubRepository;
             this._tournamentRepository = tournamentRepository;
