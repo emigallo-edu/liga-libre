@@ -21,7 +21,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ApplicationBusinessRules\ApplicationBusinessRules.csproj" />
-    <ProjectReference Include="..\Model\Model.csproj" />
     <ProjectReference Include="..\Repository\Repository.csproj" />
   </ItemGroup>
 

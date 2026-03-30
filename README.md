@@ -1,8 +1,7 @@
 # net-web-api-lab
 
-Para correr la API en VSCODE
+### Diagrama de paquetes
+![](/Docs/package-diagrama.png)
 
-1. Ir al raiz y ejecutar dotnet build
-2. cd /NetWebApi
-3. dotnet run NetWebApi.csproj
-4. https://localhost:7054/swagger/index.html
+### Diagrama de clases
+![](/Docs/class-diagram.png)

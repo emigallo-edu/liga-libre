@@ -4,9 +4,9 @@ namespace ApplicationBusinessRules
 {
     public class ChangeClubNameUseCase
     {
-        private readonly Model.EnterpriseBusinessRules.ChangeClubName _changeClubName;
+        private readonly ChangeClubName _changeClubName;
 
-        public ChangeClubNameUseCase(Model.EnterpriseBusinessRules.ChangeClubName changeClubName)
+        public ChangeClubNameUseCase(ChangeClubName changeClubName)
         {
             _changeClubName = changeClubName;
         }

@@ -1,0 +1,58 @@
+  @startuml Diagrama de Paquetes - Liga Libre
+                                                                                              skinparam packageStyle rectangle
+  skinparam linetype ortho
+
+  package "Api" {
+      package "Controllers" {}
+      package "Middlewares" {}
+      package "DTOs" as ApiModel {}
+      package "Context" {}
+      package "Utils" {}
+      package "Mocks" {}
+  }
+
+  package "Web" {
+      package "Services" as WebServices {}
+      package "Models" as WebModels {}
+      package "Components" {}
+  }
+
+  package "ApplicationBusinessRules" {
+      package "UseCases" {}
+  }
+
+  package "Entities" {
+      package "Entidades" as EntEntities {}
+      package "EnterpriseBusinessRules" {}
+      package "Repositories" as RepoInterfaces {}
+  }
+
+  package "Repository" {
+      package "Implementaciones" {}
+      package "Migrations" as RepoMigrations {}
+  }
+
+  package "Security" {
+      package "Identity" {}
+      package "Migrations" as SecMigrations {}
+  }
+
+  package "Test" {
+      package "MockRepositories" as TestRepos {}
+  }
+
+  ' === Dependencias ===
+  Api --> ApplicationBusinessRules
+  Api --> Repository
+  Api --> Security
+
+  ApplicationBusinessRules --> Entities
+
+  Repository --> Entities
+
+  Test --> ApplicationBusinessRules
+  Test --> Repository
+
+  Web ..> Api : HTTP
+
+  @enduml

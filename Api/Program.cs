@@ -1,33 +1,15 @@
 using ApplicationBusinessRules;
-using Model.Entities;
 using Model.EnterpriseBusinessRules;
-using Model.Repositories;
+using Model.Entities;
 using NetWebApi.Context;
 using NetWebApi.Model;
-using NetWebApi.Utils;
-using Repository;
 using Security;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers(
+builder.Services.AddControllers();
 
-// Manejo de Exception por Filter
-//    options =>
-//{
-//    options.Filters.Add<CustomExceptionFilter>();
-//}
-
-);
-
-
-// Repository
-builder.Services.AddScoped<IClubRepository, ClubDbRepository>();
-builder.Services.AddScoped<ITournamentRepository, TournamentRepository>();
-builder.Services.AddScoped<IMatchRepository, MatchRepository>();
-builder.Services.AddScoped<IStandingRepository, StandingRepository>();
-builder.Services.AddScoped<IStadiumRepository, StadiumRepository>();
-builder.Services.AddScoped<IResponseAuditRepository, ResponseAuditRepository>();
+builder.Services.AddRepositories(DatabaseType.SqlServer);
 
 // EnterpriseBusinessRules
 builder.Services.AddScoped<GetClubById>();
@@ -75,15 +57,6 @@ builder.Services.AddInMemoryApplicationDbContext();
 builder.Services.AddSecurityDbContext();
 builder.Services.AddSecurity();
 
-//builder.Services.AddCors(options =>
-//{
-//    options.AddPolicy(name: "AcceptLocalHost",
-//                      policy =>
-//                      {
-//                          policy.WithOrigins("http://127.0.0.1:5500");
-//                      });
-//});
-
 builder.Services.AddAutoMapper(configuration =>
 {
     configuration.CreateMap<ClubDTO, Club>()
@@ -101,9 +74,4 @@ app.UseHttpsRedirection();
 app.MapControllers();
 app.UseAuthentication();
 app.UseAuthorization();
-//app.UseCors("AcceptLocalHost");
-
-// Maneja de Exception por Middleware
-//app.UseMiddleware<ExceptionMiddleware>();
-
 app.Run();

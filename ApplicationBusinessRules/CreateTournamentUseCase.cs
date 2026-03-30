@@ -38,16 +38,7 @@ namespace ApplicationBusinessRules
                 });
             }
 
-            // Devuelvo la cantidad de registros afectados en el insert (en este caso siempre va a ser 0 o 1)
             return await this._insertTournament.ExecuteAsync(this._tournament);
-        }
-
-        public int GetTournamentIdCreated()
-        {
-            // El Id del torneo is del tipo Identity, al momento de hacer el insert de la LN: 42, lo setea el mismo SQL
-            // Como el atributo '_tournament' es privado, quien consume este service no tiene acceso al id generado
-            // Expongo este método para que pueda consultarlo en caso de que lo necesite
-            return this._tournament.Id;
         }
 
         private List<Match> GetDayMatchs(List<Club> clubs)
