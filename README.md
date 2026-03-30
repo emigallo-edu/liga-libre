@@ -1,7 +1,7 @@
-# net-web-api-lab
+# Liga Libre
 
 ### Diagrama de paquetes
-![](/Docs/package-diagrama.png)
+![](/Docs/package-diagram.png)
 
 ### Diagrama de clases
 ![](/Docs/class-diagram.png)
