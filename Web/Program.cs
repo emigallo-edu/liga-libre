@@ -11,6 +11,9 @@ builder.Services.AddRazorComponents()
 var apiBaseUrl = builder.Configuration.GetValue<string>("ApiBaseUrl") ?? "http://localhost:5182";
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(apiBaseUrl) });
 
+// Weather
+builder.Services.AddHttpClient<IWeatherService, WeatherService>();
+
 // Servicios
 builder.Services.AddScoped<ClubService>();
 builder.Services.AddScoped<TournamentService>();
