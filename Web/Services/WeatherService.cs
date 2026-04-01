@@ -1,4 +1,3 @@
-using System.Net.Http.Json;
 using System.Text.Json.Serialization;
 using Web.Models;
 
@@ -7,26 +6,50 @@ namespace Web.Services;
 public class WeatherService : IWeatherService
 {
     private readonly HttpClient _http;
+    private readonly string _unit;
 
     public WeatherService(HttpClient http)
     {
         _http = http;
+        _unit = "fahrenheit";
+        //_unit = "celsius";
     }
 
-    public async Task<WeatherInfo> GetCurrentWeatherAsync()
+    public async Task<WeatherInfo> GetCurrentWeatherAsync(string latitude, string longitude)
     {
-        var response = await _http.GetFromJsonAsync<OpenMeteoResponse>(
-            "https://api.open-meteo.com/v1/forecast?latitude=-34.6131&longitude=-58.3772&current=temperature_2m,weather_code");
+        var weatherTask = _http.GetFromJsonAsync<OpenMeteoResponse>(
+            $"https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&current=temperature_2m,weather_code&temperature_unit={_unit}");
 
+        var cityTask = GetCityNameAsync(latitude, longitude);
+
+        await Task.WhenAll(weatherTask, cityTask);
+
+        var response = weatherTask.Result;
         if (response?.Current is null)
             throw new InvalidOperationException("No se pudo obtener el clima.");
 
         return new WeatherInfo
         {
-            Temperature = response.Current.Temperature2m,
+            TemperatureFahrenheit = response.Current.Temperature2m,
             Description = MapWeatherCode(response.Current.WeatherCode),
-            City = "Buenos Aires"
+            City = cityTask.Result
         };
+    }
+
+    private async Task<string> GetCityNameAsync(string latitude, string longitude)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get,
+            $"https://nominatim.openstreetmap.org/reverse?lat={latitude}&lon={longitude}&format=json&accept-language=es");
+        request.Headers.UserAgent.ParseAdd("LigaLibre/1.0");
+
+        var response = await _http.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+
+        var result = await response.Content.ReadFromJsonAsync<NominatimResponse>();
+        return result?.Address?.City
+            ?? result?.Address?.Town
+            ?? result?.Address?.State
+            ?? "Desconocido";
     }
 
     private static string MapWeatherCode(int code) => code switch
@@ -59,4 +82,22 @@ internal class OpenMeteoCurrent
 
     [JsonPropertyName("weather_code")]
     public int WeatherCode { get; set; }
+}
+
+internal class NominatimResponse
+{
+    [JsonPropertyName("address")]
+    public NominatimAddress? Address { get; set; }
+}
+
+internal class NominatimAddress
+{
+    [JsonPropertyName("city")]
+    public string? City { get; set; }
+
+    [JsonPropertyName("town")]
+    public string? Town { get; set; }
+
+    [JsonPropertyName("state")]
+    public string? State { get; set; }
 }

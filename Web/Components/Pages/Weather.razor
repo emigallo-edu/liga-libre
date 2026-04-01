@@ -17,7 +17,7 @@
         else if (_weather is not null)
         {
             <p class="card-text">
-                <span class="fs-3 fw-bold">@(_weather.Temperature)°C</span>
+                <span class="fs-3 fw-bold">@(_weather.TemperatureCelsius.ToString("F1"))°C</span>
                 <br />
                 <span class="text-muted">@_weather.Description</span>
             </p>
@@ -34,7 +34,7 @@
     {
         try
         {
-            _weather = await WeatherService.GetCurrentWeatherAsync();
+            _weather = await WeatherService.GetCurrentWeatherAsync("-34.6131", "-58.3772");
         }
         catch (Exception ex)
         {
