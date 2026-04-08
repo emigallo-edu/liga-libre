@@ -21,13 +21,20 @@ jobs:
         shell: pwsh
         run: ./scripts/build.ps1
 
-      - name: Test
+      - name: Test Unit
         shell: pwsh
-        run: ./scripts/test.ps1
+        run: dotnet test Tests/Test.Unit/Test.Unit.csproj --configuration Release --no-build --logger trx --results-directory TestResults/Unit
 
-      - name: Upload test results
-        if: always()
+      - name: Test Acceptance
+        shell: pwsh
+        run: dotnet test Tests/Test.Acceptance/Test.Acceptance.csproj --configuration Release --no-build --logger trx --results-directory TestResults/Acceptance
+
+      - name: Test Integration
+        shell: pwsh
+        run: dotnet test Tests/Test.Integration/Test.Integration.csproj --configuration Release --no-build --logger trx --results-directory TestResults/Integration
+
+      - name: Upload binaries
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
-          path: TestResults/
+          name: binaries
+          path: **/bin/Release/
