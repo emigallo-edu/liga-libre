@@ -1,7 +1,9 @@
-﻿using Microsoft.Data.Sqlite;
+﻿using ApplicationBusinessRules;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Model.EnterpriseBusinessRules;
 using Model.Repositories;
 using Repository;
 using Security;
@@ -11,6 +13,7 @@ namespace NetWebApi.Context
     public enum DatabaseType
     {
         SqlServer,
+        PostgreSql,
         Files
     }
 
@@ -64,7 +67,7 @@ namespace NetWebApi.Context
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             db.Database.EnsureCreated();
 
-            DataSeeder.SeedLigaLibreData(out var clubes, out var torneo, out var partidos, out var resultados); 
+            DataSeeder.SeedLigaLibreData(out var clubes, out var torneo, out var partidos, out var resultados);
             db.Clubs.AddRange(clubes);
             db.Tournaments.Add(torneo);
             db.Matches.AddRange(partidos);
@@ -80,6 +83,7 @@ namespace NetWebApi.Context
 
         public static void AddRepositories(this IServiceCollection services, DatabaseType databaseType)
         {
+            services.AddApplicationDbContext();
             if (databaseType == DatabaseType.Files)
             {
                 services.AddScoped<IClubRepository, ClubFileRepository>(
@@ -96,6 +100,49 @@ namespace NetWebApi.Context
             services.AddScoped<IStadiumRepository, StadiumRepository>();
         }
 
+        public static void AddEnterpriseBusinessRules(this IServiceCollection services)
+        {
+            services.AddScoped<GetClubById>();
+            services.AddScoped<GetAllClubs>();
+            services.AddScoped<GetAllClubsShort>();
+            services.AddScoped<InsertClub>();
+            services.AddScoped<ChangeClubName>();
+            services.AddScoped<UpdateClub>();
+            services.AddScoped<UpdateClubWithStadium>();
+            services.AddScoped<GetClubsWithRegulations>();
+            services.AddScoped<InsertTournament>();
+            services.AddScoped<GetTournamentById>();
+            services.AddScoped<GetAllTournaments>();
+            services.AddScoped<GetMatch>();
+            services.AddScoped<GetMatchesByTournament>();
+            services.AddScoped<InsertMatchResult>();
+            services.AddScoped<GetStandingsByTournament>();
+            services.AddScoped<GetStanding>();
+            services.AddScoped<UpdateStanding>();
+            services.AddScoped<GetStadium>();
+            services.AddScoped<GetAllResponseAudits>();
+            services.AddScoped<InsertResponseAudit>();
+        }
+
+        public static void AddApplicationBusinessRules(this IServiceCollection services)
+        {
+            services.AddScoped<CreateTournamentUseCase>();
+            services.AddScoped<CreateClubUseCase>();
+            services.AddScoped<GetClubByIdUseCase>();
+            services.AddScoped<GetAllClubsUseCase>();
+            services.AddScoped<GetAllClubsShortUseCase>();
+            services.AddScoped<ChangeClubNameUseCase>();
+            services.AddScoped<UpdateClubUseCase>();
+            services.AddScoped<UpdateClubWithStadiumUseCase>();
+            services.AddScoped<GetClubsWithRegulationsUseCase>();
+            services.AddScoped<GetAllTournamentsUseCase>();
+            services.AddScoped<GetTournamentByIdUseCase>();
+            services.AddScoped<GetMatchesByTournamentUseCase>();
+            services.AddScoped<RegisterMatchResultUseCase>();
+            services.AddScoped<GetStandingsByTournamentUseCase>();
+            services.AddScoped<GetAllResponseAuditsUseCase>();
+        }
+
         public static T Get<T>()
         {
             return _provider.GetRequiredService<T>();
@@ -104,9 +151,20 @@ namespace NetWebApi.Context
         public static void Config(this DbContextOptionsBuilder contextOptionsBuilder)
         {
             string connectionString = GetConnectionString();
-            contextOptionsBuilder.UseSqlServer(connectionString, x =>
-               x.MigrationsHistoryTable("_MigrationsHistory", "dbo")
-               .CommandTimeout((int)TimeSpan.FromMinutes(10).TotalSeconds));
+            var dbType = GetDatabaseType();
+
+            if (dbType == DatabaseType.PostgreSql)
+            {
+                contextOptionsBuilder.UseNpgsql(connectionString, x =>
+                    x.MigrationsHistoryTable("_MigrationsHistory", "public")
+                    .CommandTimeout((int)TimeSpan.FromMinutes(10).TotalSeconds));
+            }
+            else
+            {
+                contextOptionsBuilder.UseSqlServer(connectionString, x =>
+                    x.MigrationsHistoryTable("_MigrationsHistory", "dbo")
+                    .CommandTimeout((int)TimeSpan.FromMinutes(10).TotalSeconds));
+            }
         }
 
         public static void SetProvider(IServiceProvider provider)
@@ -119,9 +177,18 @@ namespace NetWebApi.Context
             return _provider;
         }
 
+        private static DatabaseType GetDatabaseType()
+        {
+            var envDbType = Environment.GetEnvironmentVariable("DATABASE_TYPE");
+            if (!string.IsNullOrEmpty(envDbType) && Enum.TryParse<DatabaseType>(envDbType, true, out var parsed))
+                return parsed;
+
+            return DatabaseType.SqlServer;
+        }
+
         private static string GetConnectionString()
         {
-            // Environment variable takes precedence (useful for Docker)
+            // Environment variable takes precedence (useful for Docker/Render)
             var envConnectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
             if (!string.IsNullOrEmpty(envConnectionString))
                 return envConnectionString;

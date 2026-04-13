@@ -1,0 +1,45 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Build
+        shell: pwsh
+        run: ./scripts/build.ps1
+
+      - name: Test Unit
+        shell: pwsh
+        run: dotnet test Tests/Test.Unit/Test.Unit.csproj --configuration Release --no-build --logger trx --results-directory TestResults/Unit
+
+      - name: Test Acceptance
+        shell: pwsh
+        run: dotnet test Tests/Test.Acceptance/Test.Acceptance.csproj --configuration Release --no-build --logger trx --results-directory TestResults/Acceptance
+
+      - name: Test Integration
+        shell: pwsh
+        run: dotnet test Tests/Test.Integration/Test.Integration.csproj --configuration Release --no-build --logger trx --results-directory TestResults/Integration
+
+      - name: Upload binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: binaries
+          path: "**/bin/Release/"
+
+  deploy:
+    needs: build-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Render
+        run: curl -s "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
