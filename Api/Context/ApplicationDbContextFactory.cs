@@ -98,6 +98,7 @@ namespace NetWebApi.Context
             services.AddScoped<IStandingRepository, StandingRepository>();
             services.AddScoped<ITournamentRepository, TournamentRepository>();
             services.AddScoped<IStadiumRepository, StadiumRepository>();
+            services.AddScoped<MigrationRepository>();
         }
 
         public static void AddEnterpriseBusinessRules(this IServiceCollection services)
