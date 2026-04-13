@@ -183,7 +183,7 @@ namespace NetWebApi.Context
             if (!string.IsNullOrEmpty(envDbType) && Enum.TryParse<DatabaseType>(envDbType, true, out var parsed))
                 return parsed;
 
-            return DatabaseType.SqlServer;
+            return DatabaseType.PostgreSql;
         }
 
         private static string GetConnectionString()
@@ -199,7 +199,7 @@ namespace NetWebApi.Context
 
             var configuration = configurationBuilder.Build();
 
-            return configuration.GetConnectionString("DefaultConnectionString");
+            return ConvertIfPostgresUrl(configuration.GetConnectionString("DefaultConnectionString"));
         }
 
         private static string ConvertIfPostgresUrl(string connectionString)
