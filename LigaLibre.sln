@@ -5,7 +5,14 @@ VisualStudioVersion = 17.7.34221.43
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A497C2C7-FFF0-4845-9116-F2B06500A014}"
 	ProjectSection(SolutionItems) = preProject
+		.github\workflows\acceptance-test.yml = .github\workflows\acceptance-test.yml
+		.github\workflows\commit-stage.yml = .github\workflows\commit-stage.yml
+		docker-compose.yml = docker-compose.yml
+		Dockerfile.api = Dockerfile.api
+		Dockerfile.web = Dockerfile.web
 		README.md = README.md
+		.github\workflows\release.yml = .github\workflows\release.yml
+		render.yaml = render.yaml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Api", "Api\Api.csproj", "{758A2B7F-45C2-4626-9701-60BEE2F5C5F0}"

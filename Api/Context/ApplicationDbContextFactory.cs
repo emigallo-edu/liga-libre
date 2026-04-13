@@ -183,7 +183,7 @@ namespace NetWebApi.Context
             if (!string.IsNullOrEmpty(envDbType) && Enum.TryParse<DatabaseType>(envDbType, true, out var parsed))
                 return parsed;
 
-            return DatabaseType.PostgreSql;
+            return DatabaseType.SqlServer;
         }
 
         private static string GetConnectionString()

@@ -1,9 +1,3 @@
-databases:
-  - name: liga-libre-db
-    plan: free
-    databaseName: liga_libre
-    user: liga_user
-
 services:
   - type: web
     name: liga-libre-api
@@ -12,11 +6,9 @@ services:
     dockerfilePath: ./Dockerfile.api
     envVars:
       - key: DATABASE_TYPE
-        value: PostgreSql
+        value: SqlServer
       - key: ConnectionStrings__DefaultConnection
-        fromDatabase:
-          name: liga-libre-db
-          property: connectionString
+        sync: false
 
   - type: web
     name: liga-libre-web

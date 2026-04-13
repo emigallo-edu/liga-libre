@@ -3,12 +3,11 @@ name: Commit Stage
 on:
   push:
     branches: [main]
-    tags: ['v*']
   pull_request:
     branches: [main]
 
 jobs:
-  build-and-test:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,9 +21,43 @@ jobs:
         shell: pwsh
         run: ./scripts/build.ps1
 
+      - name: Upload build output
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: .
+
+  unit-tests:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download build output
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
       - name: Unit Tests
         shell: pwsh
         run: dotnet test Tests/Test.Unit/Test.Unit.csproj --configuration Release --no-build --logger trx --results-directory TestResults/Unit
+
+  architecture-tests:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download build output
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
 
       - name: Architecture Tests
         shell: pwsh
