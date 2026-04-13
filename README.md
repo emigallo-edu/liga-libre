@@ -165,10 +165,12 @@ El pipeline se dispara automáticamente con cada push a `main`:
 
 
 Los 3 workflows
-Archivo	Trigger	Qué hace
-commit-stage.yml	Push/PR a main	Build + tests unitarios + arquitectura + publica imagen en GHCR
-acceptance-test.yml	Commit Stage exitoso	Tests de aceptación + integración
-release.yml	Acceptance Tests exitoso	Despliega la misma imagen en Render via API
+
+| Paso | Workflow | Archivo	| Trigger	| Qué hace|
+|------|----------|---------|-----------|---------|
+| 1    | Commmit Stage | commit-stage.yml | Push/PR a main | Build + tests unitarios + arquitectura |
+| 2    | Acceptance Tests | acceptance-test.yml | Manual | Tests de aceptación + integración |
+| release.yml | Manual | Despliega la misma imagen en Render via API |
 
 Secrets que necesitás crear en GitHub
 RENDER_API_KEY — API key de tu cuenta Render

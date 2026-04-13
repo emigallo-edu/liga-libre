@@ -5,12 +5,15 @@ on:
     workflows: ["Commit Stage"]
     types: [completed]
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
 jobs:
   acceptance-tests:
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
       startsWith(github.event.workflow_run.head_branch, 'v')
-
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -33,3 +36,61 @@ jobs:
       - name: Integration Tests
         shell: pwsh
         run: dotnet test Tests/Test.Integration/Test.Integration.csproj --configuration Release --no-build --logger trx --results-directory TestResults/Integration
+
+  publish-and-deploy:
+    needs: acceptance-tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Extract version
+        id: version
+        run: echo "VERSION=${{ github.event.workflow_run.head_branch }}" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push API image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile.api
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-api:${{ steps.version.outputs.VERSION }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-api:latest
+
+      - name: Build and push Web image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile.web
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-web:${{ steps.version.outputs.VERSION }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-web:latest
+
+      - name: Deploy API to Staging
+        run: |
+          curl -s -X POST \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{"imageUrl": "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-api:${{ steps.version.outputs.VERSION }}"}' \
+            "https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID_API_STAGING }}/deploys"
+
+      - name: Deploy Web to Staging
+        run: |
+          curl -s -X POST \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{"imageUrl": "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-web:${{ steps.version.outputs.VERSION }}"}' \
+            "https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID_WEB_STAGING }}/deploys"
