@@ -10,13 +10,26 @@ services:
       - sqlserver-data:/var/opt/mssql
 
   api:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.api
     ports:
       - "5000:8080"
     depends_on:
       - db
     environment:
       - ConnectionStrings__DefaultConnection=Server=db;Database=NetWebApi;User Id=sa;Password=LigaLibre123!;Encrypt=false;TrustServerCertificate=true
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    ports:
+      - "5001:8080"
+    depends_on:
+      - api
+    environment:
+      - ApiBaseUrl=http://api:8080
 
 volumes:
   sqlserver-data:

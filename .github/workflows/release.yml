@@ -15,10 +15,18 @@ jobs:
     if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to Render
+      - name: Deploy API to Render
         run: |
           curl -s -X POST \
             -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
             -H "Content-Type: application/json" \
-            -d '{"imageUrl": "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.workflow_run.head_sha }}"}' \
-            "https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys"
+            -d '{"imageUrl": "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-api:${{ github.event.workflow_run.head_sha }}"}' \
+            "https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID_API }}/deploys"
+
+      - name: Deploy Web to Render
+        run: |
+          curl -s -X POST \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{"imageUrl": "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-web:${{ github.event.workflow_run.head_sha }}"}' \
+            "https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID_WEB }}/deploys"

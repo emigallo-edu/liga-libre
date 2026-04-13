@@ -9,7 +9,7 @@ services:
     name: liga-libre-api
     plan: free
     runtime: docker
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: ./Dockerfile.api
     envVars:
       - key: DATABASE_TYPE
         value: PostgreSql
@@ -17,3 +17,12 @@ services:
         fromDatabase:
           name: liga-libre-db
           property: connectionString
+
+  - type: web
+    name: liga-libre-web
+    plan: free
+    runtime: docker
+    dockerfilePath: ./Dockerfile.web
+    envVars:
+      - key: ApiBaseUrl
+        value: https://liga-libre-api.onrender.com

@@ -5,10 +5,15 @@ WORKDIR /src
 # Copy solution and project files
 COPY LigaLibre.sln .
 COPY Api/Api.csproj Api/
-COPY Model/Model.csproj Model/
+COPY Entities/Entities.csproj Entities/
+COPY ApplicationBusinessRules/ApplicationBusinessRules.csproj ApplicationBusinessRules/
 COPY Repository/Repository.csproj Repository/
 COPY Security/Security.csproj Security/
-COPY Test/Test.csproj Test/
+COPY Web/Web.csproj Web/
+COPY Tests/Test.Unit/Test.Unit.csproj Tests/Test.Unit/
+COPY Tests/Test.Integration/Test.Integration.csproj Tests/Test.Integration/
+COPY Tests/Test.Acceptance/Test.Acceptance.csproj Tests/Test.Acceptance/
+COPY Tests/Test.Architecture/Test.Architecture.csproj Tests/Test.Architecture/
 
 # Restore dependencies
 RUN dotnet restore
