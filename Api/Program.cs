@@ -1,6 +1,8 @@
+using Microsoft.EntityFrameworkCore;
 using Model.Entities;
 using NetWebApi.Context;
 using NetWebApi.Model;
+using Repository;
 using Security;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,6 +32,13 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 ApplicationDbContextFactoryConfig.SetProvider(app.Services);
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+}
+
 app.UseHttpsRedirection();
 app.MapControllers();
 app.UseAuthentication();
