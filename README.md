@@ -169,8 +169,8 @@ Los 3 workflows
 | Paso | Workflow | Archivo	| Trigger	| Qué hace|
 |------|----------|---------|-----------|---------|
 | 1    | Commmit Stage | commit-stage.yml | Push/PR a main | Build + tests unitarios + arquitectura |
-| 2    | Acceptance Tests | acceptance-test.yml | Manual | Tests de aceptación + integración |
-| release.yml | Manual | Despliega la misma imagen en Render via API |
+| 2    | Acceptance Tests | acceptance-test.yml | Tag | Build + acceptance + integration tests + publica imagen en GHCR + despliega en staging |
+| 3    | Release | release.yml | Manual | Despliega la misma imagen en Render via API |
 
 Secrets que necesitás crear en GitHub
 RENDER_API_KEY — API key de tu cuenta Render

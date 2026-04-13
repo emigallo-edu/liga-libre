@@ -79,6 +79,16 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-web:${{ steps.version.outputs.VERSION }}
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-web:latest
 
+      - name: Debug Render config
+        run: |
+          echo "Service ID length: ${#SERVICE_ID}"
+          echo "API Key length: ${#API_KEY}"
+          echo "Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-api:${{ steps.version.outputs.VERSION }}"
+          echo "URL: https://api.render.com/v1/services/${SERVICE_ID}/deploys"
+        env:
+          SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID_API_STAGING }}
+          API_KEY: ${{ secrets.RENDER_API_KEY }}
+
       - name: Deploy API to Staging
         run: |
           curl -s -X POST \
