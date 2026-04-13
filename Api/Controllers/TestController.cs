@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Reflection;
+using Microsoft.AspNetCore.Mvc;
 
 namespace NetWebApi.Controllers
 {
@@ -9,7 +10,8 @@ namespace NetWebApi.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            return Ok("Api Liga Libre");
+            var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";
+            return Ok($"Api Liga Libre v{version}");
         }
     }
 }
