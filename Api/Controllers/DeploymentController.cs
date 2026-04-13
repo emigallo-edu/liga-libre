@@ -4,6 +4,8 @@ using Repository;
 
 namespace Api.Controllers
 {
+    [ApiController]
+    [Route("[controller]")]
     public class DeploymentController : Controller
     {
         private readonly MigrationRepository _migrationRepository;
