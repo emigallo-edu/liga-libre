@@ -1,6 +1,7 @@
 #!/usr/bin/env pwsh
 param(
-    [string]$Configuration = "Release"
+    [string]$Configuration = "Release",
+    [string]$Version = "0.0.0"
 )
 
 $ErrorActionPreference = "Stop"
@@ -11,5 +12,5 @@ dotnet restore (Join-Path $root "LigaLibre.sln")
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 Write-Host "==> Compilando solución ($Configuration)" -ForegroundColor Cyan
-dotnet build (Join-Path $root "LigaLibre.sln") --configuration $Configuration --no-restore
+dotnet build (Join-Path $root "LigaLibre.sln") --configuration $Configuration --no-restore /p:Version=$Version
 exit $LASTEXITCODE
