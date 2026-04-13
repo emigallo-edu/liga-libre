@@ -1,45 +1,24 @@
 name: Release
 
 on:
-  push:
+  workflow_run:
+    workflows: ["Acceptance Tests"]
+    types: [completed]
     branches: [main]
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
 jobs:
-  build-test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
-
-      - name: Build
-        shell: pwsh
-        run: ./scripts/build.ps1
-
-      - name: Test Unit
-        shell: pwsh
-        run: dotnet test Tests/Test.Unit/Test.Unit.csproj --configuration Release --no-build --logger trx --results-directory TestResults/Unit
-
-      - name: Test Acceptance
-        shell: pwsh
-        run: dotnet test Tests/Test.Acceptance/Test.Acceptance.csproj --configuration Release --no-build --logger trx --results-directory TestResults/Acceptance
-
-      - name: Test Integration
-        shell: pwsh
-        run: dotnet test Tests/Test.Integration/Test.Integration.csproj --configuration Release --no-build --logger trx --results-directory TestResults/Integration
-
-      - name: Upload binaries
-        uses: actions/upload-artifact@v4
-        with:
-          name: binaries
-          path: "**/bin/Release/"
-
   deploy:
-    needs: build-test
+    if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to Render
-        run: curl -s "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+        run: |
+          curl -s -X POST \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{"imageUrl": "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.workflow_run.head_sha }}"}' \
+            "https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys"

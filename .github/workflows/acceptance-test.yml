@@ -1,16 +1,19 @@
-name: CI
+name: Acceptance Tests
 
 on:
-  push:
-    branches: [main]
-  pull_request:
+  workflow_run:
+    workflows: ["Commit Stage"]
+    types: [completed]
     branches: [main]
 
 jobs:
-  build-test:
+  acceptance-tests:
+    if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -21,20 +24,10 @@ jobs:
         shell: pwsh
         run: ./scripts/build.ps1
 
-      - name: Test Unit
-        shell: pwsh
-        run: dotnet test Tests/Test.Unit/Test.Unit.csproj --configuration Release --no-build --logger trx --results-directory TestResults/Unit
-
-      - name: Test Acceptance
+      - name: Acceptance Tests
         shell: pwsh
         run: dotnet test Tests/Test.Acceptance/Test.Acceptance.csproj --configuration Release --no-build --logger trx --results-directory TestResults/Acceptance
 
-      - name: Test Integration
+      - name: Integration Tests
         shell: pwsh
         run: dotnet test Tests/Test.Integration/Test.Integration.csproj --configuration Release --no-build --logger trx --results-directory TestResults/Integration
-
-      - name: Upload binaries
-        uses: actions/upload-artifact@v4
-        with:
-          name: binaries
-          path: "**/bin/Release/"

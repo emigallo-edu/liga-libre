@@ -127,38 +127,46 @@ dotnet test LigaLibre.sln
 
 ## Paso a paso: Desplegar en Render
 
-##### Flujo
-
-1. Push a main → arranca commit-stage
-2. Si pasa → acceptance-test despliega en staging con curl al hook de staging, espera que levante, y corre los tests de aceptación apuntando a la URL de staging
-3. Si pasa → release hace curl al hook de producción
-
-El punto más interesante es el paso 2: después del curl al hook de staging, Render tarda un rato en construir y desplegar. Vas a necesitar esperar a que el servicio esté disponible antes de correr los tests de aceptación. ¿Querés que armemos los tres workflows?
-
-##### 1. Crear los recursos en Render manualmente
+##### 1. Crear los recursos en Render manualmente (una sola vez):
 
 1. Ir a [Render](dashboard.render.com)
-2. Crear New > PostgreSQL > plan Free > nombre liga-libre-db
-3. Crear New > Web Service > conectar tu repo > plan Free > elegir Docker > agregar las variables de entorno:
+2. Crear New > PostgreSQL > plan Free > nombre `liga-libre-db`
+3. Crear New > Web Service > elegir **"Deploy an existing image from a registry"** > plan Free
+4. En Image URL poner: `ghcr.io/{tu-usuario}/liga-libre:latest`
+5. Agregar las variables de entorno:
 
 ```text
 DATABASE_TYPE = PostgreSql
 ConnectionStrings__DefaultConnection = (copiar la Internal Connection String de la DB que creaste)
 ```
 
-##### 2. Obtener el Deploy Hook:
+##### 2. Obtener el API Key y Service ID de Render:
 
-En el Web Service que creaste > Settings > Deploy Hook
-Copiar la URL (tiene forma https://api.render.com/deploy/srv-xxxxx?key=yyyyy)
+- API Key: ir a Account Settings > API Keys > crear una key
+- Service ID: en el Web Service que creaste, copiar el ID de la URL (tiene forma `srv-xxxxxxxxxx`)
 
-
-##### 3. Guardar el hook como GitHub Secret:
+##### 3. Guardar los secrets en GitHub:
 
 Repo en GitHub > Settings > Secrets and variables > Actions
-Nuevo secret: RENDER_DEPLOY_HOOK_URL = la URL que copiaste
-RENDER_DEPLOY_HOOK_URL_STAGING
+- `RENDER_API_KEY` = la API Key que creaste
+- `RENDER_SERVICE_ID` = el Service ID del Web Service
 
-##### 4. Agregar el job de deploy al pipeline:
+##### 4. Pipeline (ya configurado en `.github/workflows/`):
+
+El pipeline se dispara automáticamente con cada push a `main`:
+
+1. **Commit Stage** (`commit-stage.yml`): compila, corre tests unitarios y de arquitectura, construye la imagen Docker y la publica en GitHub Container Registry (GHCR)
+2. **Acceptance Tests** (`acceptance-test.yml`): corre tests de aceptación e integración
+3. **Release** (`release.yml`): despliega en Render la imagen exacta que pasó todos los tests
 
 
 
+Los 3 workflows
+Archivo	Trigger	Qué hace
+commit-stage.yml	Push/PR a main	Build + tests unitarios + arquitectura + publica imagen en GHCR
+acceptance-test.yml	Commit Stage exitoso	Tests de aceptación + integración
+release.yml	Acceptance Tests exitoso	Despliega la misma imagen en Render via API
+
+Secrets que necesitás crear en GitHub
+RENDER_API_KEY — API key de tu cuenta Render
+RENDER_SERVICE_ID — el ID del Web Service (lo ves en la URL, srv-xxxxx
