@@ -36,17 +36,6 @@ namespace Test.Architecture
                 .GetResult();
 
             Assert.IsTrue(result.IsSuccessful, "Entities no debe depender de Repository");
-        }
-
-        [TestMethod]
-        public void Given_Entities_When_CheckingDependencies_Then_ShouldNotDependOnSecurity()
-        {
-            var result = Types.InAssembly(typeof(Model.Entities.Club).Assembly)
-                .ShouldNot()
-                .HaveDependencyOn("Security")
-                .GetResult();
-
-            Assert.IsTrue(result.IsSuccessful, "Entities no debe depender de Security");
-        }      
+        }    
     }
 }

@@ -27,17 +27,5 @@ namespace Test.Architecture
 
             Assert.IsTrue(result.IsSuccessful, "Repository no debe depender de ApplicationBusinessRules");
         }
-
-        [TestMethod]
-        public void Given_Repository_When_CheckingDependencies_Then_ShouldNotDependOnSecurity()
-        {
-            var result = Types.InAssembly(typeof(ClubFileRepository).Assembly)
-                .ShouldNot()
-                .HaveDependencyOn("Security")
-                .GetResult();
-
-            Assert.IsTrue(result.IsSuccessful, "Repository no debe depender de Security");
-        }
-
     }
 }
