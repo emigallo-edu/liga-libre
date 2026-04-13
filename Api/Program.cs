@@ -1,12 +1,11 @@
-using Microsoft.EntityFrameworkCore;
+using DotNetEnv;
 using Model.Entities;
 using NetWebApi.Context;
 using NetWebApi.Model;
-using Repository;
 using Security;
 
 var builder = WebApplication.CreateBuilder(args);
-
+Env.Load();
 builder.Services.AddControllers();
 var dbType = Enum.TryParse<DatabaseType>(Environment.GetEnvironmentVariable("DATABASE_TYPE"), true, out var parsed)
     ? parsed

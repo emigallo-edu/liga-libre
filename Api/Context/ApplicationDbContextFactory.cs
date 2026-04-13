@@ -189,34 +189,12 @@ namespace NetWebApi.Context
 
         private static string GetConnectionString()
         {
-            // Environment variable takes precedence (useful for Docker/Render)
-            var envConnectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
-            if (!string.IsNullOrEmpty(envConnectionString))
-                return ConvertIfPostgresUrl(envConnectionString);
-
-            var configurationBuilder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", false, true);
-
-            var configuration = configurationBuilder.Build();
-
-            return ConvertIfPostgresUrl(configuration.GetConnectionString("DefaultConnectionString"));
-        }
-
-        private static string ConvertIfPostgresUrl(string connectionString)
-        {
-            if (!connectionString.StartsWith("postgres://") && !connectionString.StartsWith("postgresql://"))
-                return connectionString;
-
-            var uri = new Uri(connectionString);
-            var userInfo = uri.UserInfo.Split(':');
-            var host = uri.Host;
-            var port = uri.Port > 0 ? uri.Port : 5432;
-            var database = uri.AbsolutePath.TrimStart('/');
-            var username = userInfo[0];
-            var password = userInfo.Length > 1 ? userInfo[1] : "";
-
-            return $"Host={host};Port={port};Database={database};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=true";
+            string? cs = Environment.GetEnvironmentVariable("CONNECTION_STRING");
+            if (cs is null)
+            {
+                throw new ArgumentException("No se encontró la variable de entorno CONNECTION_STRING");
+            }
+            return cs;
         }
     }
 }
