@@ -129,7 +129,7 @@ dotnet test LigaLibre.sln
 - 
 > Nota: esta guía se diseñó para que los estudiantes puedan entender rápidamente cómo levantar el proyecto, cambiar los puntos de conexión y trabajar con migraciones y pruebas.
 
-## Paso a paso: Desplegar en Render
+## Paso a paso: Desplegar en la nube
 
 ##### 1. Crear los recursos manualmente:
 
