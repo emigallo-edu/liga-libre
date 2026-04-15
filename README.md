@@ -122,56 +122,102 @@ dotnet test LigaLibre.sln
   ```powershell
   dotnet test Tests/Test.Architecture/Test.Architecture.csproj
   ```
-
+  - Smoke:
+  ```powershell
+  dotnet test Tests/Test.Smoke/Test.Smoke.csproj
+  ```
+- 
 > Nota: esta guía se diseñó para que los estudiantes puedan entender rápidamente cómo levantar el proyecto, cambiar los puntos de conexión y trabajar con migraciones y pruebas.
 
 ## Paso a paso: Desplegar en Render
 
-##### 1. Crear los recursos en Render manualmente:
+##### 1. Crear los recursos manualmente:
 
-1. Ir a [Render](dashboard.render.com)
-2. Crear New > Web Service > elegir **"Deploy an existing image from a registry"** > plan Free
-    - En Image URL poner: `ghcr.io/{tu-usuario}/liga-libre-api:latest`
+**1.a Crear la base de datos en Azure SQL (plan gratuito)**
+
+Render no ofrece SQL Server nativo, así que la DB vive en Azure SQL Database. El plan gratuito da 32 GB por 12 meses.
+
+1. Entrar al [Portal de Azure](https://portal.azure.com) y crear una cuenta si no tenés.
+2. Crear un **SQL Server**:
+    - Create a resource > **SQL Database** > Create.
+    - En la pestaña *Basics* > *Server*, clic en **Create new**:
+        - Server name: `liga-libre1` (debe ser único globalmente)
+        - Location: una región cercana (ej. `Brazil South`)
+        - Authentication method: **Use SQL authentication**
+        - Admin login + password: guardalos, los vas a necesitar para la connection string.
+3. Crear la **Database**:
+    - Database name: `liga-libre-staging`
+    - Compute + storage: clic en **Configure database** > elegir **General Purpose - Serverless** > seleccionar **Free tier** (100.000 vCore-segundos por mes) o el tier más chico disponible.
+    - Backup storage redundancy: Locally-redundant.
+4. En la pestaña *Networking*:
+    - Connectivity method: **Public endpoint**.
+    - Allow Azure services and resources to access this server: **Yes** (para que Render pueda conectarse).
+    - Add current client IP address: **Yes** (para poder correr migraciones desde tu máquina).
+5. Revisar y crear. Tarda 1-2 minutos.
+6. Una vez creada, ir a la DB > *Connection strings* > pestaña **ADO.NET** y copiar la cadena. Va a tener la forma:
+    ```text
+    Server=tcp:liga-libre-sql.database.windows.net,1433;Initial Catalog=LigaLibre;Persist Security Info=False;User ID={tu-admin};Password={tu-password};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
+    ```
+    Reemplazar `{tu-admin}` y `{tu-password}` por los valores reales.
+
+> **Nota sobre instancias free**: Azure SQL en free tier se auto-pausa tras un rato de inactividad. La primera request tras el pause tarda ~30 segundos en levantar la DB y puede devolver `500`. Si el pipeline falla con 500 en el step de `Update DB`, re-ejecutar el job suele resolverlo.
+
+**1.b Crear el Web Service en Render**
+
+1. Ir a [Render](https://dashboard.render.com) y crear cuenta.
+2. **New > Web Service** > elegir **"Deploy an existing image from a registry"** > plan **Free**.
+    - Image URL: `ghcr.io/{tu-usuario}/liga-libre-api:latest` (reemplazar `{tu-usuario}` por tu usuario/org de GitHub).
+    - Region: la más cercana a la region de Azure SQL.
     - Agregar las variables de entorno:
-
-```text
-DATABASE_TYPE = SqlServer
-CONNECTION_STRING = (copiar la Connection String de la DB que creaste)
-```
-3. Crear la DB
-
-4. Crear la web
-
+    ```text
+    DATABASE_TYPE   = SqlServer
+    CONNECTION_STRING = (pegar la Connection String obtenida en el paso 1.a)
+    ```
+3. Crear el servicio. Render va a intentar el primer deploy; puede fallar si la imagen aún no fue publicada — no importa, los próximos deploys los dispara el pipeline.
 
 ##### 2. Obtener el API Key y Service ID de Render:
 
-- API Key: ir a Account Settings > API Keys > crear una key
-- Service ID: en el Web Service que creaste, copiar el ID de la URL (tiene forma `srv-xxxxxxxxxx`)
+- **API Key**: *Account Settings > API Keys* > **Create API Key**.
+- **Service ID**: entrar al Web Service creado y copiar el ID desde la URL del dashboard (tiene la forma `srv-xxxxxxxxxx`).
 
-##### 3. Guardar los secrets en GitHub:
+##### 3. Configurar secrets y variables en GitHub:
 
-Repo en GitHub > Settings > Secrets and variables > Actions
-- `RENDER_API_KEY` = la API Key que creaste
-- `RENDER_SERVICE_ID` = el Service ID del Web Service
+*Repo en GitHub > Settings > Secrets and variables > Actions*.
+
+**Secrets** (pestaña *Secrets*):
+- `RENDER_API_KEY` — la API Key creada en el paso 2.
+- `RENDER_SERVICE_ID_API_STAGING` — el Service ID del Web Service de la API.
+- `RENDER_SERVICE_ID_WEB_STAGING` — el Service ID del Web Service de la Web *(pendiente hasta que se despliegue la Web)*.
+
+**Variables** (pestaña *Variables*):
+- `SMOKE_STAGING_API_URL` — la URL pública del Web Service en Render, ej. `https://liga-libre-api.onrender.com`. Se usa en el pipeline para el smoke test y el update-db.
 
 ##### 4. Pipeline (ya configurado en `.github/workflows/`):
 
-El pipeline se dispara automáticamente con cada push a `main`:
+El release está gateado por tags `v*`. Un push o PR a `main` solo corre Commit Stage; el deploy real arranca cuando pusheás un tag de versión:
 
-1. **Commit Stage** (`commit-stage.yml`): compila, corre tests unitarios y de arquitectura, construye la imagen Docker y la publica en GitHub Container Registry (GHCR)
-2. **Acceptance Tests** (`acceptance-test.yml`): corre tests de aceptación e integración
-3. **Release** (`release.yml`): despliega en Render la imagen exacta que pasó todos los tests
+```powershell
+git tag v1.0.0
+git push origin v1.0.0
+```
 
+Flujo completo disparado por el tag:
 
+| # | Workflow | Archivo | Trigger | Qué hace |
+|---|----------|---------|---------|----------|
+| 1 | Commit Stage | `commit-stage.yml` | Push/PR a `main`, push de tag `v*` | Build + tests unitarios + tests de arquitectura |
+| 2 | Acceptance Tests — job `acceptance-tests` | `acceptance-test.yml` | `workflow_run` sobre Commit Stage exitoso (solo si el branch/tag empieza con `v`) | Tests de aceptación + integración |
+| 3 | Acceptance Tests — job `publish-and-deploy` | `acceptance-test.yml` | Depende de `acceptance-tests` | Publica la imagen en GHCR y dispara el deploy en Render |
+| 4 | Acceptance Tests — job `update-db` | `acceptance-test.yml` | Depende de `publish-and-deploy` | Espera a que la API esté arriba y llama a `POST /Deployment/update-database` para aplicar migraciones |
+| 5 | Acceptance Tests — job `smoke-tests` | `acceptance-test.yml` | Depende de `update-db` | Verifica drift modelo↔migraciones y corre el proyecto `Test.Smoke` contra staging |
 
-Los 3 workflows
+`release.yml` por ahora es un placeholder; el deploy a staging se hace desde `acceptance-test.yml`.
 
-| Paso | Workflow | Archivo	| Trigger	| Qué hace|
-|------|----------|---------|-----------|---------|
-| 1    | Commmit Stage | commit-stage.yml | Push/PR a main | Build + tests unitarios + arquitectura |
-| 2    | Acceptance Tests | acceptance-test.yml | Tag | Build + acceptance + integration tests + publica imagen en GHCR + despliega en staging |
-| 3    | Release | release.yml | Manual | Despliega la misma imagen en Render via API |
+**Resumen de secrets y variables**:
 
-Secrets que necesitás crear en GitHub
-RENDER_API_KEY — API key de tu cuenta Render
-RENDER_SERVICE_ID — el ID del Web Service (lo ves en la URL, srv-xxxxx
+| Nombre | Tipo | Dónde se usa |
+|--------|------|--------------|
+| `RENDER_API_KEY` | secret | Autenticación contra la API de Render para disparar deploys |
+| `RENDER_SERVICE_ID_API_STAGING` | secret | Identifica el Web Service de la API |
+| `RENDER_SERVICE_ID_WEB_STAGING` | secret | Identifica el Web Service de la Web (pendiente) |
+| `SMOKE_STAGING_API_URL` | variable | URL pública del API para update-db y smoke tests |
