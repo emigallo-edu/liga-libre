@@ -52,6 +52,13 @@ namespace NetWebApi.Controllers
             return Ok();
         }
 
+        [HttpPost("v2")]
+        public async Task<IActionResult> CreateV2(ClubDTOV2 club)
+        {
+            await this._createClub.ExecuteAsync(this._mapper.Map<Club>(club));
+            return Ok();
+        }
+
         [HttpGet("id/{id}")]
         public async Task<IActionResult> Get([FromRoute] int id)
         {
