@@ -44,14 +44,6 @@ namespace NetWebApi.Controllers
             this._mapper = mapper;
         }
 
-        [HttpPost]
-        [Obsolete("Este endpoint queda deprecado a partir de 20/04/2026, se recomienda usar el endpoint de actualización para crear o modificar un club")]
-        public async Task<IActionResult> Create(ClubDTO club)
-        {
-            await this._createClub.ExecuteAsync(this._mapper.Map<Club>(club));
-            return Ok();
-        }
-
         [HttpPost("v2")]
         public async Task<IActionResult> CreateV2(ClubDTOV2 club)
         {
@@ -88,7 +80,7 @@ namespace NetWebApi.Controllers
         }
 
         [HttpPut()]
-        public async Task<IActionResult> Update(ClubDTO club)
+        public async Task<IActionResult> Update(ClubDTOV2 club)
         {
             await this._updateClub.ExecuteAsync(this._mapper.Map<Club>(club));
             return Ok();
