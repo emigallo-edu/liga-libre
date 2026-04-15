@@ -130,15 +130,15 @@ dotnet test LigaLibre.sln
 ##### 1. Crear los recursos en Render manualmente:
 
 1. Ir a [Render](dashboard.render.com)
-2. Crear New > PostgreSQL > plan Free > nombre `liga-libre-db`
-3. Crear New > Web Service > elegir **"Deploy an existing image from a registry"** > plan Free
+2. Crear New > Web Service > elegir **"Deploy an existing image from a registry"** > plan Free
     - En Image URL poner: `ghcr.io/{tu-usuario}/liga-libre-api:latest`
     - Agregar las variables de entorno:
 
 ```text
-DATABASE_TYPE = PostgreSql
-ConnectionStrings__DefaultConnection = (copiar la Internal Connection String de la DB que creaste)
+DATABASE_TYPE = SqlServer
+CONNECTION_STRING = (copiar la Connection String de la DB que creaste)
 ```
+3. Crear la DB
 
 4. Crear la web
 

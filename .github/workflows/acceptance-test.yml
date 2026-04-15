@@ -104,3 +104,36 @@ jobs:
             -H "Content-Type: application/json" \
             -d '{"imageUrl": "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-web:${{ steps.version.outputs.VERSION }}"}' \
             "https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID_WEB_STAGING }}/deploys"
+
+  smoke-tests:
+    needs: publish-and-deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Esperar a que la API este disponible
+        env:
+          SMOKE_API_URL: ${{ vars.SMOKE_STAGING_API_URL }}
+        run: |
+          for i in {1..30}; do
+            if curl -sf "$SMOKE_API_URL/Deployment/build" > /dev/null; then
+              echo "API disponible"
+              exit 0
+            fi
+            echo "Intento $i: API todavia no responde, reintentando en 10s..."
+            sleep 10
+          done
+          echo "La API no respondio a tiempo"
+          exit 1
+
+      - name: Smoke Tests
+        env:
+          SMOKE_API_URL: ${{ vars.SMOKE_STAGING_API_URL }}
+        run: dotnet test Tests/Test.Smoke/Test.Smoke.csproj --configuration Release --logger trx --results-directory TestResults/Smoke
