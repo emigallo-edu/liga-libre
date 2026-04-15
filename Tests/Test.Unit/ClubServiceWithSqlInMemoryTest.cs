@@ -33,7 +33,8 @@ namespace Test
                 City = "Bs As",
                 Phone = "1234567890",
                 NumberOfPartners = 1231,
-                Address = "Av. Rivadavia 1234"
+                Address = "Av. Rivadavia 1234",
+                ContactName = "Un nombre de contacto"
             };
             if (context.Database.EnsureCreated())
             {
