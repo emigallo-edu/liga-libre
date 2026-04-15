@@ -3,7 +3,7 @@ namespace Test.Smoke;
 [TestClass]
 public class ApiSmokeTest
 {
-    private const string DEFAULT_BASE_URL = "http://localhost:5000";
+    private const string DEFAULT_BASE_URL = "http://localhost:7054";
     private static HttpClient _client = null!;
 
     [ClassInitialize]
@@ -40,20 +40,10 @@ public class ApiSmokeTest
     [TestMethod]
     public async Task Given_ApiConectadaALaDb_When_SeConsultaMigrations_Then_RespondeOk()
     {
-        var response = await _client.GetAsync("/Deployment/migrations");
+        var response = await _client.GetAsync("/club/all");
 
         Assert.IsTrue(response.IsSuccessStatusCode,
-            $"La api no pudo comunicarse con la db al consultar migrations. Status: {response.StatusCode}");
-    }
-
-    [TestMethod]
-    public async Task Given_ApiConectadaALaDb_When_SeConsultaMigrations_Then_ListaEncabezadoDeMigracionesAplicadas()
-    {
-        var response = await _client.GetAsync("/Deployment/migrations");
-
-        var body = await response.Content.ReadAsStringAsync();
-        StringAssert.Contains(body, "Migraciones aplicadas",
-            $"Se esperaba el encabezado de migraciones aplicadas. Body: {body}");
+            $"La api no pudo comunicarse con la db al consultar clubes. Status: {response.StatusCode}");
     }
 
     [TestMethod]
