@@ -31,6 +31,8 @@ namespace Model.Entities
 
         public string? StadiumName { get; set; }
 
+        public string ContactName { get; set; }
+
         public ICollection<Player> Players;
 
         public Stadium? Stadium { get; set; }
