@@ -33,5 +33,13 @@ namespace Repository
                 return await db.Database.GetPendingMigrationsAsync();
             }
         }
+
+        public async Task<IEnumerable<string>> GetAppliedMigrationsAsync()
+        {
+            using (var db = new ApplicationDbContext(this._options))
+            {
+                return await db.Database.GetAppliedMigrationsAsync();
+            }
+        }
     }
 }

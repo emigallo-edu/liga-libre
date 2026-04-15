@@ -13,7 +13,6 @@ namespace NetWebApi.Context
     public enum DatabaseType
     {
         SqlServer,
-        PostgreSql,
         Files
     }
 
@@ -152,20 +151,9 @@ namespace NetWebApi.Context
         public static void Config(this DbContextOptionsBuilder contextOptionsBuilder)
         {
             string connectionString = GetConnectionString();
-            var dbType = GetDatabaseType();
-
-            if (dbType == DatabaseType.PostgreSql)
-            {
-                contextOptionsBuilder.UseNpgsql(connectionString, x =>
-                    x.MigrationsHistoryTable("_MigrationsHistory", "public")
-                    .CommandTimeout((int)TimeSpan.FromMinutes(10).TotalSeconds));
-            }
-            else
-            {
-                contextOptionsBuilder.UseSqlServer(connectionString, x =>
-                    x.MigrationsHistoryTable("_MigrationsHistory", "dbo")
-                    .CommandTimeout((int)TimeSpan.FromMinutes(10).TotalSeconds));
-            }
+            contextOptionsBuilder.UseSqlServer(connectionString, x =>
+                x.MigrationsHistoryTable("_MigrationsHistory", "dbo")
+                .CommandTimeout((int)TimeSpan.FromMinutes(10).TotalSeconds));
         }
 
         public static void SetProvider(IServiceProvider provider)
@@ -176,15 +164,6 @@ namespace NetWebApi.Context
         public static IServiceProvider GetProvider()
         {
             return _provider;
-        }
-
-        private static DatabaseType GetDatabaseType()
-        {
-            var envDbType = Environment.GetEnvironmentVariable("DATABASE_TYPE");
-            if (!string.IsNullOrEmpty(envDbType) && Enum.TryParse<DatabaseType>(envDbType, true, out var parsed))
-                return parsed;
-
-            return DatabaseType.SqlServer;
         }
 
         private static string GetConnectionString()

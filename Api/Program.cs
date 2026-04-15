@@ -7,10 +7,7 @@ using Security;
 var builder = WebApplication.CreateBuilder(args);
 Env.Load();
 builder.Services.AddControllers();
-var dbType = Enum.TryParse<DatabaseType>(Environment.GetEnvironmentVariable("DATABASE_TYPE"), true, out var parsed)
-    ? parsed
-    : DatabaseType.PostgreSql;
-builder.Services.AddRepositories(dbType);
+builder.Services.AddRepositories(DatabaseType.SqlServer);
 builder.Services.AddEnterpriseBusinessRules();
 builder.Services.AddApplicationBusinessRules();
 builder.Services.AddEndpointsApiExplorer();
@@ -31,12 +28,6 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 ApplicationDbContextFactoryConfig.SetProvider(app.Services);
-
-//using (var scope = app.Services.CreateScope())
-//{
-//    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-//    db.Database.Migrate();
-//}
 
 app.UseHttpsRedirection();
 app.MapControllers();
