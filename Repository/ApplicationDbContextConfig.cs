@@ -13,8 +13,7 @@ namespace Repository
                 .HasKey(x => x.Id);
 
             entity.Property(x => x.ContactName)
-                .IsRequired()
-                .HasDefaultValue("nombre temporal");
+                .IsRequired();
         }
 
         internal static void ConfigPlayer(this ModelBuilder mb)
