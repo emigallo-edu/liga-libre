@@ -44,5 +44,16 @@ namespace Api.Controllers
             var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "unknown";
             return Ok($"Api Liga Libre v{version}");
         }
+
+        [HttpGet("model-drift")]
+        public async Task<IActionResult> ModelDrift()
+        {
+            var pendings = await _migrationRepository.GetPendingMigrations();
+            if (pendings.Any())
+            {
+                return Conflict("El modelo tiene cambios que no estan capturados en ninguna migracion. Falta correr 'dotnet ef migrations add'.");
+            }
+            return Ok("El modelo y las migraciones estan sincronizados.");
+        }
     }
 }

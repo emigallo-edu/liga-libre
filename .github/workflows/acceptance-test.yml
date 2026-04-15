@@ -142,6 +142,11 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
+      - name: Verificar drift entre modelo y migraciones
+        env:
+          API_URL: ${{ vars.SMOKE_STAGING_API_URL }}
+        run: curl -fsS "$API_URL/Deployment/model-drift"
+
       - name: Smoke Tests
         env:
           SMOKE_API_URL: ${{ vars.SMOKE_STAGING_API_URL }}
