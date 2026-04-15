@@ -11,6 +11,10 @@ namespace Repository
 
             entity.ToTable("Clubs", "dbo")
                 .HasKey(x => x.Id);
+
+            entity.Property(x => x.ContactName)
+                .IsRequired()
+                .HasDefaultValue("nombre temporal");
         }
 
         internal static void ConfigPlayer(this ModelBuilder mb)

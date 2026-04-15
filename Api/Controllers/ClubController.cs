@@ -45,12 +45,12 @@ namespace NetWebApi.Controllers
         }
 
         [HttpPost]
+        [Obsolete("Este endpoint queda deprecado a partir de 20/04/2026, se recomienda usar el endpoint de actualización para crear o modificar un club")]
         public async Task<IActionResult> Create(ClubDTO club)
         {
             await this._createClub.ExecuteAsync(this._mapper.Map<Club>(club));
             return Ok();
         }
-
 
         [HttpGet("id/{id}")]
         public async Task<IActionResult> Get([FromRoute] int id)

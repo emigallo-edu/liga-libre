@@ -4,6 +4,11 @@ namespace NetWebApi.Model
 {
     public class ClubDTO
     {
+        public ClubDTO()
+        {
+            ContactName = "nombre temporal";
+        }
+
         public int Id { get; set; }
 
         [Required]
@@ -27,5 +32,6 @@ namespace NetWebApi.Model
         public string? Address { get; set; }
 
         public string? StadiumName { get; set; }
+        public string ContactName { get; private set; }
     }
 }
