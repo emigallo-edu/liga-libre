@@ -17,7 +17,7 @@ builder.Services.AddSecurity();
 
 builder.Services.AddAutoMapper(configuration =>
 {
-    configuration.CreateMap<ClubDTO, Club>()
+    configuration.CreateMap<ClubDTOV2, Club>()
         .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.NombreClub))
         .ReverseMap();
 });
