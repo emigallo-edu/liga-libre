@@ -127,6 +127,7 @@ namespace NetWebApi.Context
         public static void AddApplicationBusinessRules(this IServiceCollection services)
         {
             services.AddScoped<CreateTournamentUseCase>();
+            services.AddScoped<CreateSingleLegTournamentUseCase>();
             services.AddScoped<CreateClubUseCase>();
             services.AddScoped<GetClubByIdUseCase>();
             services.AddScoped<GetAllClubsUseCase>();

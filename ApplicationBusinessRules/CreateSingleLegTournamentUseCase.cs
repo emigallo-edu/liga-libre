@@ -3,12 +3,12 @@ using Model.EnterpriseBusinessRules;
 
 namespace ApplicationBusinessRules
 {
-    public class CreateTournamentUseCase
+    public class CreateSingleLegTournamentUseCase
     {
         private readonly GetAllClubs _getAllClubs;
         private readonly InsertTournament _insertTournament;
 
-        public CreateTournamentUseCase(GetAllClubs getAllClubs, InsertTournament insertTournament)
+        public CreateSingleLegTournamentUseCase(GetAllClubs getAllClubs, InsertTournament insertTournament)
         {
             this._getAllClubs = getAllClubs;
             this._insertTournament = insertTournament;
@@ -17,9 +17,9 @@ namespace ApplicationBusinessRules
         public async Task<int> ExecuteAsync()
         {
             List<Club> clubs = await this._getAllClubs.ExecuteAsync();
-            List<Match> matches = this.GetDayMatchs(clubs);
+            List<Match> matches = this.BuildFixture(clubs);
 
-           var tournament = new Tournament()
+            var tournament = new Tournament()
             {
                 Start = matches.Min(x => x.Date),
                 Standings = new List<Standing>(),
@@ -39,15 +39,7 @@ namespace ApplicationBusinessRules
             return await this._insertTournament.ExecuteAsync(tournament);
         }
 
-        private List<Match> GetDayMatchs(List<Club> clubs)
-        {
-            List<Match> firstLeg = this.BuildFirstLeg(clubs);
-            List<Match> secondLeg = this.BuildSecondLeg(firstLeg, clubs.Count);
-
-            return firstLeg.Concat(secondLeg).ToList();
-        }
-
-        private List<Match> BuildFirstLeg(List<Club> clubs)
+        private List<Match> BuildFixture(List<Club> clubs)
         {
             List<int?> rotation = clubs.Select(c => (int?)c.Id).ToList();
             if (rotation.Count % 2 != 0)
@@ -68,19 +60,19 @@ namespace ApplicationBusinessRules
 
                 for (int i = 0; i < matchesPerRound; i++)
                 {
-                    int? homeId = rotation[i];
-                    int? awayId = rotation[teamCount - 1 - i];
+                    int? firstId = rotation[i];
+                    int? secondId = rotation[teamCount - 1 - i];
 
-                    if (homeId == null || awayId == null)
+                    if (firstId == null || secondId == null)
                     {
                         continue;
                     }
 
-                    bool swapForBalance = i == 0 && round % 2 == 1;
+                    bool firstIsLocal = Random.Shared.Next(2) == 0;
                     matches.Add(new Match()
                     {
-                        LocalClubId = swapForBalance ? awayId.Value : homeId.Value,
-                        VisitingClubId = swapForBalance ? homeId.Value : awayId.Value,
+                        LocalClubId = firstIsLocal ? firstId.Value : secondId.Value,
+                        VisitingClubId = firstIsLocal ? secondId.Value : firstId.Value,
                         Date = matchDay
                     });
                 }
@@ -94,19 +86,6 @@ namespace ApplicationBusinessRules
             }
 
             return matches;
-        }
-
-        private List<Match> BuildSecondLeg(List<Match> firstLeg, int clubCount)
-        {
-            int firstLegRounds = (clubCount % 2 == 0 ? clubCount : clubCount + 1) - 1;
-            int offsetDays = 7 * firstLegRounds;
-
-            return firstLeg.Select(m => new Match()
-            {
-                LocalClubId = m.VisitingClubId,
-                VisitingClubId = m.LocalClubId,
-                Date = m.Date.AddDays(offsetDays)
-            }).ToList();
         }
     }
 }
