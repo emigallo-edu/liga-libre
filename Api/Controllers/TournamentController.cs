@@ -9,11 +9,9 @@ namespace NetWebApi.Controllers
     [Route("[controller]")]
     public class TournamentController : Controller
     {
-        private readonly CreateTournamentUseCase _createTournament;
         private readonly GetAllTournamentsUseCase _getAllTournaments;
         private readonly GetTournamentByIdUseCase _getTournamentById;
         private readonly CreateSingleLegTournamentUseCase _createSingleLegTournament;
-        private readonly GetAllClubs _getAllClubs;
 
         public TournamentController(
             CreateTournamentUseCase createTournament,
@@ -22,11 +20,9 @@ namespace NetWebApi.Controllers
             GetTournamentByIdUseCase getTournamentById,
             GetAllClubs getAllClubs)
         {
-            this._createTournament = createTournament;
             this._createSingleLegTournament = createSingleLegTournament;
             this._getAllTournaments = getAllTournaments;
             this._getTournamentById = getTournamentById;
-            this._getAllClubs = getAllClubs;
         }
 
         [HttpPost]
@@ -34,16 +30,8 @@ namespace NetWebApi.Controllers
         {
             try
             {
-                List<Club> clubs = await this._getAllClubs.ExecuteAsync();
-                if (clubs.Count > 15)
-                {
-                    await this._createTournament.ExecuteAsync();
-                }
-                else
-                {
-                    await this._createSingleLegTournament.ExecuteAsync();
-                }
-                return Ok($"Torneo {this._createTournament} creado correctamente");
+                await this._createSingleLegTournament.ExecuteAsync();
+                return Ok($"Torneo {this._createSingleLegTournament} creado correctamente");
             }
             catch (Exception)
             {
